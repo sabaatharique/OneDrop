@@ -1,0 +1,26 @@
+package com.LesMiserables.OneDrop.authentication.dto;
+
+import com.LesMiserables.OneDrop.authentication.User.Role;
+import com.LesMiserables.OneDrop.authentication.validation.ValidUserRole;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class RegisterRequest {
+    @NotBlank(message = "Email required")
+    private String email;
+
+    @NotBlank(message = "Password required")
+    private String password;
+
+    @NotBlank(message = "Full name required")
+    private String fullName;
+
+    // user can only register as DONOR or RECIPIENT
+    @NotBlank(message = "Role required")
+    @ValidUserRole
+    private Role role;
+
+    @NotBlank(message = "Phone number required")
+    private String phone;
+}
