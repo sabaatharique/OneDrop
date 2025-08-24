@@ -1,0 +1,10 @@
+package com.LesMiserables.OneDrop.donor.dto;
+
+import lombok.Data;
+
+@Data
+public class DonorRequestDTO {
+    private Long userId;       // ID of the associated User
+    private String bloodType;
+    private String city;
+}
