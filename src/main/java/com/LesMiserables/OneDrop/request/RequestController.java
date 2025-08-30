@@ -2,7 +2,7 @@ package com.LesMiserables.OneDrop.request;
 
 import com.LesMiserables.OneDrop.request.dto.CreateRequestDTO;
 import com.LesMiserables.OneDrop.request.dto.RequestDTO;
-import com.LesMiserables.OneDrop.request.dto.UpdateRequestStatusDTO;
+import com.LesMiserables.OneDrop.request.dto.UpdateRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,12 +31,32 @@ public class RequestController {
         return ResponseEntity.ok(requestService.getPendingRequests());
     }
 
-    @PutMapping("/{requestId}/status")
-    public ResponseEntity<RequestDTO> updateStatus(
+    @PutMapping("/{requestId}")
+    public ResponseEntity<RequestDTO> updateRequest(
             @PathVariable Long requestId,
-            @RequestBody UpdateRequestStatusDTO dto
+            @RequestBody UpdateRequestDTO dto
     ) {
-        return ResponseEntity.ok(requestService.updateStatus(requestId, dto));
+        return ResponseEntity.ok(requestService.updateRequest(requestId, dto));
+    }
+
+    @PutMapping("/{requestId}/accept")
+    public ResponseEntity<RequestDTO> acceptRequest(@PathVariable Long requestId) {
+        return ResponseEntity.ok(requestService.acceptRequest(requestId));
+    }
+
+    @PutMapping("/{requestId}/complete")
+    public ResponseEntity<RequestDTO> completeRequest(@PathVariable Long requestId) {
+        return ResponseEntity.ok(requestService.completeRequest(requestId));
+    }
+
+    @PutMapping("/{requestId}/reject")
+    public ResponseEntity<RequestDTO> rejectRequest(@PathVariable Long requestId) {
+        return ResponseEntity.ok(requestService.rejectRequest(requestId));
+    }
+
+    @PutMapping("/{requestId}/cancel")
+    public ResponseEntity<RequestDTO> cancelRequest(@PathVariable Long requestId) {
+        return ResponseEntity.ok(requestService.cancelRequest(requestId));
     }
 
     @DeleteMapping("/{requestId}")

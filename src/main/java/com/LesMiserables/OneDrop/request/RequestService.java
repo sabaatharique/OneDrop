@@ -4,7 +4,7 @@ import com.LesMiserables.OneDrop.recipient.Recipient;
 import com.LesMiserables.OneDrop.recipient.RecipientRepository;
 import com.LesMiserables.OneDrop.request.dto.CreateRequestDTO;
 import com.LesMiserables.OneDrop.request.dto.RequestDTO;
-import com.LesMiserables.OneDrop.request.dto.UpdateRequestStatusDTO;
+import com.LesMiserables.OneDrop.request.dto.UpdateRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +29,7 @@ public class RequestService {
         request.setLocation(dto.getLocation());
         request.setStatus(Request.Status.PENDING);
         request.setCreatedAt(LocalDateTime.now());
+        request.setRequiredBy(dto.getRequiredBy());
 
         Request saved = requestRepo.save(request);
         return mapToDto(saved);
@@ -48,15 +49,69 @@ public class RequestService {
                 .collect(Collectors.toList());
     }
 
-    public RequestDTO updateStatus(Long requestId, UpdateRequestStatusDTO dto) {
+    public RequestDTO updateRequest(Long requestId, UpdateRequestDTO dto) {
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        request.setStatus(dto.getStatus());
-        Request updated = requestRepo.save(request);
+        if (dto.getStatus() != null) {
+            request.setStatus(dto.getStatus());
+        }
 
-        return mapToDto(updated);
+        if (dto.getRequiredBy() != null) {
+            request.setRequiredBy(dto.getRequiredBy());
+        }
+
+        return mapToDto(requestRepo.save(request));
     }
+
+    public RequestDTO acceptRequest(Long requestId) {
+        Request request = requestRepo.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (request.getStatus() != Request.Status.PENDING) {
+            throw new RuntimeException("Only pending requests can be accepted");
+        }
+
+        request.setStatus(Request.Status.MATCHED);
+        return mapToDto(requestRepo.save(request));
+    }
+
+    public RequestDTO completeRequest(Long requestId) {
+        Request request = requestRepo.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (request.getStatus() != Request.Status.MATCHED) {
+            throw new RuntimeException("Only matched requests can be marked fulfilled");
+        }
+
+        request.setStatus(Request.Status.FULFILLED);
+        return mapToDto(requestRepo.save(request));
+    }
+
+    public RequestDTO rejectRequest(Long requestId) {
+        Request request = requestRepo.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (request.getStatus() != Request.Status.MATCHED) {
+            throw new RuntimeException("Only matched requests can be rejected by donor");
+        }
+
+        request.setStatus(Request.Status.PENDING);
+        return mapToDto(requestRepo.save(request));
+    }
+
+    public RequestDTO cancelRequest(Long requestId) {
+        Request request = requestRepo.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (request.getStatus() == Request.Status.FULFILLED || request.getStatus() == Request.Status.EXPIRED) {
+            throw new RuntimeException("Cannot cancel a fulfilled or expired request");
+        }
+
+        request.setStatus(Request.Status.CANCELLED);
+        return mapToDto(requestRepo.save(request));
+    }
+
 
     public void deleteRequest(Long requestId) {
         if (!requestRepo.existsById(requestId)) {
@@ -73,8 +128,15 @@ public class RequestService {
                 request.getBloodType(),
                 request.getLocation(),
                 request.getStatus(),
-                request.getCreatedAt()
+                request.getCreatedAt(),
+                request.getRequiredBy()
         );
     }
-}
 
+    public void updateExpiredRequests() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Request> expired = requestRepo.findByStatusAndRequiredByBefore(Request.Status.PENDING, now);
+        expired.forEach(r -> r.setStatus(Request.Status.EXPIRED));
+        requestRepo.saveAll(expired);
+    }
+}

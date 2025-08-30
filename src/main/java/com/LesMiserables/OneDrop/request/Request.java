@@ -27,6 +27,9 @@ public class Request {
     @Column(nullable = false)
     private String location;
 
+    @Column(nullable = false)
+    private LocalDateTime requiredBy;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
@@ -37,6 +40,7 @@ public class Request {
         PENDING,
         MATCHED,
         FULFILLED,
-        CANCELLED
+        CANCELLED,
+        EXPIRED
     }
 }

@@ -16,4 +16,5 @@ public class RequestDTO {
     private String location;
     private Request.Status status;
     private LocalDateTime createdAt;
+    private LocalDateTime requiredBy;
 }
