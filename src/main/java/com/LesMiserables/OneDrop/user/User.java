@@ -1,4 +1,4 @@
-package com.LesMiserables.OneDrop.authentication;
+package com.LesMiserables.OneDrop.user;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +26,7 @@ public class User {
     public enum Role {
         DONOR,
         RECIPIENT,
+        BOTH,
         ADMIN
     }
 

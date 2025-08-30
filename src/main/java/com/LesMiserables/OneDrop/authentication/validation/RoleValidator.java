@@ -1,6 +1,6 @@
 package com.LesMiserables.OneDrop.authentication.validation;
 
-import com.LesMiserables.OneDrop.authentication.User;
+import com.LesMiserables.OneDrop.user.User;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

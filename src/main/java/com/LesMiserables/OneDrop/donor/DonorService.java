@@ -1,7 +1,7 @@
 package com.LesMiserables.OneDrop.donor;
 
-import com.LesMiserables.OneDrop.authentication.User;
-import com.LesMiserables.OneDrop.authentication.UserRepository;
+import com.LesMiserables.OneDrop.user.User;
+import com.LesMiserables.OneDrop.user.UserRepository;
 import com.LesMiserables.OneDrop.donor.dto.DonorRequestDTO;
 import com.LesMiserables.OneDrop.donor.dto.DonorResponseDTO;
 import org.springframework.stereotype.Service;
@@ -20,9 +20,8 @@ public class DonorService {
         this.userRepository = userRepository;
     }
 
-    // Add a new donor
+    // add new donor
     public DonorResponseDTO addDonor(DonorRequestDTO request) {
-        // Fetch the User entity from DB using userId from DTO
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
 
@@ -38,11 +37,12 @@ public class DonorService {
                 saved.getId(),
                 saved.getBloodType(),
                 saved.getCity(),
+                saved.isEligibleToDonate(),
                 saved.getUser().getId()
         );
     }
 
-    // Get all donors
+    // get all donors
     public List<DonorResponseDTO> getAllDonors() {
         return donorRepository.findAll()
                 .stream()
@@ -50,12 +50,13 @@ public class DonorService {
                         d.getId(),
                         d.getBloodType(),
                         d.getCity(),
+                        d.isEligibleToDonate(),
                         d.getUser().getId()
                 ))
                 .collect(Collectors.toList());
     }
 
-    // Get donor by ID
+    // get donor by ID
     public DonorResponseDTO getDonorById(Long id) {
         Donor donor = donorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Donor not found with id: " + id));
@@ -64,11 +65,12 @@ public class DonorService {
                 donor.getId(),
                 donor.getBloodType(),
                 donor.getCity(),
+                donor.isEligibleToDonate(),
                 donor.getUser().getId()
         );
     }
 
-    // Delete donor by ID
+    // delete donor by ID
     public void deleteDonor(Long id) {
         if (!donorRepository.existsById(id)) {
             throw new RuntimeException("Donor not found with id: " + id);

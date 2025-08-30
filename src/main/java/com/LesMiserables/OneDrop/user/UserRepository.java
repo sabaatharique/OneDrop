@@ -1,4 +1,4 @@
-package com.LesMiserables.OneDrop.authentication;
+package com.LesMiserables.OneDrop.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;

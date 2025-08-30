@@ -6,8 +6,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class DonorResponseDTO {
-    private Long id;           // Donor ID
+    private Long id;
     private String bloodType;
     private String city;
-    private Long userId;       // ID of the associated User
+    private boolean eligibleToDonate;
+    private Long userId;
 }

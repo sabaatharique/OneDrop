@@ -1,6 +1,6 @@
 package com.LesMiserables.OneDrop.authentication.dto;
 
-import com.LesMiserables.OneDrop.authentication.User.Role;
+import com.LesMiserables.OneDrop.user.User.Role;
 import com.LesMiserables.OneDrop.authentication.validation.ValidUserRole;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

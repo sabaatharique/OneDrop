@@ -6,6 +6,8 @@ import com.LesMiserables.OneDrop.authentication.dto.RegisterRequest;
 import com.LesMiserables.OneDrop.authentication.exception.InvalidCredentialsException;
 import com.LesMiserables.OneDrop.authentication.exception.UnauthorisedActionException;
 import com.LesMiserables.OneDrop.authentication.exception.UserNotFoundException;
+import com.LesMiserables.OneDrop.user.User;
+import com.LesMiserables.OneDrop.user.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

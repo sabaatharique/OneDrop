@@ -1,8 +1,10 @@
 package com.LesMiserables.OneDrop.donor;
 
-import com.LesMiserables.OneDrop.authentication.User;
+import com.LesMiserables.OneDrop.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "donors")
@@ -17,6 +19,14 @@ public class Donor {
 
     @Column(nullable = false)
     private String bloodType;
+
+    @Column(nullable = true)
+    private LocalDate lastDonationDate;
+
+    @Column(nullable = false)
+    public boolean isEligibleToDonate() {
+        return lastDonationDate == null || lastDonationDate.isBefore(LocalDate.now().minusDays(90));
+    }
 
     @Column(nullable = false)
     private String city;

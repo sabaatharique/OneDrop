@@ -22,11 +22,11 @@ public class SecurityConfig {
         return http
                 // disable csrf (browser cookies)
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // add CorsConfigurationSource bean if needed
+                .cors(cors -> {})
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/donors/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

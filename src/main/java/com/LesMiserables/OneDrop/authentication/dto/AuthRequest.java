@@ -1,6 +1,6 @@
 package com.LesMiserables.OneDrop.authentication.dto;
 
-import com.LesMiserables.OneDrop.authentication.User;
+import com.LesMiserables.OneDrop.user.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
