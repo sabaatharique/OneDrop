@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.request;
 
+import com.LesMiserables.OneDrop.donor.Donor;
 import com.LesMiserables.OneDrop.recipient.Recipient;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Request {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +20,10 @@ public class Request {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
     private Recipient recipient;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "donor_id")
+    private Donor matchedDonor;
 
     @Column(nullable = false)
     private String bloodType;

@@ -12,6 +12,8 @@ public class RequestDTO {
     private Long id;
     private Long recipientId;
     private String recipientName;
+    private Long donorId;
+    private String donorName;
     private String bloodType;
     private String location;
     private Request.Status status;

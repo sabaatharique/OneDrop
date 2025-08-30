@@ -39,9 +39,15 @@ public class RequestController {
         return ResponseEntity.ok(requestService.updateRequest(requestId, dto));
     }
 
+    @GetMapping("/donor/{donorId}/nearby")
+    public ResponseEntity<List<RequestDTO>> getPendingRequestsNearby(@PathVariable Long donorId) {
+        return ResponseEntity.ok(requestService.getPendingRequestsNearby(donorId));
+    }
+
+
     @PutMapping("/{requestId}/accept")
-    public ResponseEntity<RequestDTO> acceptRequest(@PathVariable Long requestId) {
-        return ResponseEntity.ok(requestService.acceptRequest(requestId));
+    public ResponseEntity<RequestDTO> acceptRequest(@PathVariable Long requestId, @RequestParam Long donorID) {
+        return ResponseEntity.ok(requestService.acceptRequest(requestId, donorID));
     }
 
     @PutMapping("/{requestId}/complete")

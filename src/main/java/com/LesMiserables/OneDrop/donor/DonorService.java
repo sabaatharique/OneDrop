@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.donor;
 
+import com.LesMiserables.OneDrop.exceptions.DonorNotFoundException;
 import com.LesMiserables.OneDrop.user.User;
 import com.LesMiserables.OneDrop.user.UserRepository;
 import com.LesMiserables.OneDrop.donor.dto.DonorRequestDTO;
@@ -59,7 +60,7 @@ public class DonorService {
     // get donor by ID
     public DonorResponseDTO getDonorById(Long id) {
         Donor donor = donorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Donor not found with id: " + id));
+                .orElseThrow(() -> new DonorNotFoundException("Donor not found with id: " + id));
 
         return new DonorResponseDTO(
                 donor.getId(),
@@ -73,7 +74,7 @@ public class DonorService {
     // delete donor by ID
     public void deleteDonor(Long id) {
         if (!donorRepository.existsById(id)) {
-            throw new RuntimeException("Donor not found with id: " + id);
+            throw new DonorNotFoundException("Donor not found with id: " + id);
         }
         donorRepository.deleteById(id);
     }

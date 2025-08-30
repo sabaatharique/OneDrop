@@ -13,16 +13,13 @@ public class RequestExpiryService {
 
     private final RequestRepository requestRepo;
 
-    @Scheduled(fixedRate = 60 * 60 * 1000) // every hour
+    @Scheduled(fixedRate = 60 * 60 * 1000)
     public void markExpiredRequests() {
         LocalDateTime now = LocalDateTime.now();
-
         List<Request> expiredRequests = requestRepo.findByStatusAndRequiredByBefore(Request.Status.PENDING, now);
-
         expiredRequests.forEach(r -> r.setStatus(Request.Status.EXPIRED));
 
         requestRepo.saveAll(expiredRequests);
-
-        System.out.println("Marked " + expiredRequests.size() + " requests as EXPIRED");
+        // System.out.println("Marked " + expiredRequests.size() + " requests as EXPIRED");
     }
 }

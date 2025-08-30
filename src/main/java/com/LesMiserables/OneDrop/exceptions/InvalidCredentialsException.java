@@ -1,4 +1,4 @@
-package com.LesMiserables.OneDrop.authentication.exception;
+package com.LesMiserables.OneDrop.exceptions;
 
 public class InvalidCredentialsException extends RuntimeException {
     public InvalidCredentialsException (String message) {

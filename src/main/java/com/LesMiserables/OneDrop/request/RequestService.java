@@ -1,13 +1,18 @@
 package com.LesMiserables.OneDrop.request;
 
+import com.LesMiserables.OneDrop.donor.Donor;
+import com.LesMiserables.OneDrop.donor.DonorRepository;
+import com.LesMiserables.OneDrop.exceptions.*;
 import com.LesMiserables.OneDrop.recipient.Recipient;
 import com.LesMiserables.OneDrop.recipient.RecipientRepository;
 import com.LesMiserables.OneDrop.request.dto.CreateRequestDTO;
 import com.LesMiserables.OneDrop.request.dto.RequestDTO;
 import com.LesMiserables.OneDrop.request.dto.UpdateRequestDTO;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,10 +23,11 @@ public class RequestService {
 
     private final RequestRepository requestRepo;
     private final RecipientRepository recipientRepo;
+    private final DonorRepository donorRepo;
 
     public RequestDTO createRequest(CreateRequestDTO dto) {
         Recipient recipient = recipientRepo.findById(dto.getRecipientId())
-                .orElseThrow(() -> new RuntimeException("Recipient not found"));
+                .orElseThrow(() -> new RecipientNotFoundException("Recipient with id " + dto.getRecipientId() + " not found"));
 
         Request request = new Request();
         request.setRecipient(recipient);
@@ -30,6 +36,7 @@ public class RequestService {
         request.setStatus(Request.Status.PENDING);
         request.setCreatedAt(LocalDateTime.now());
         request.setRequiredBy(dto.getRequiredBy());
+        request.setMatchedDonor(null);
 
         Request saved = requestRepo.save(request);
         return mapToDto(saved);
@@ -51,7 +58,7 @@ public class RequestService {
 
     public RequestDTO updateRequest(Long requestId, UpdateRequestDTO dto) {
         Request request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new RequestNotFoundException("Request with id " + requestId + " not found"));
 
         if (dto.getStatus() != null) {
             request.setStatus(dto.getStatus());
@@ -64,67 +71,101 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
-    public RequestDTO acceptRequest(Long requestId) {
-        Request request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+    public void deleteRequest(Long requestId) {
+        if (!requestRepo.existsById(requestId)) {
+            throw new RequestNotFoundException("Request not found");
+        }
+        requestRepo.deleteById(requestId);
+    }
 
-        if (request.getStatus() != Request.Status.PENDING) {
-            throw new RuntimeException("Only pending requests can be accepted");
+    public List<RequestDTO> getPendingRequestsNearby(Long donorId) {
+        Donor donor = donorRepo.findById(donorId)
+                .orElseThrow(() -> new DonorNotFoundException("Donor with id " + donorId + " not found"));
+
+        return requestRepo.findByCityAndStatus(donor.getCity(), Request.Status.PENDING)
+                .stream()
+                .filter(r -> donor.isEligibleToDonate())
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public RequestDTO acceptRequest(Long requestId, Long donorId) {
+        Donor donor = donorRepo.findById(donorId)
+                .orElseThrow(() -> new DonorNotFoundException("Donor with id " + donorId + " not found"));
+
+        if(!donor.isEligibleToDonate()) {
+            throw new DonorNotEligibleException("Donor not eligible to donate");
         }
 
+        Request request = requestRepo.findById(requestId)
+                .orElseThrow(() -> new RequestNotFoundException("Request not found"));
+
+        if (request.getStatus() != Request.Status.PENDING) {
+            throw new InvalidRequestActionException("Only pending requests can be accepted");
+        }
+
+        request.setMatchedDonor(donor);
         request.setStatus(Request.Status.MATCHED);
         return mapToDto(requestRepo.save(request));
     }
 
+    @Transactional
     public RequestDTO completeRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new RequestNotFoundException("Request not found"));
 
         if (request.getStatus() != Request.Status.MATCHED) {
-            throw new RuntimeException("Only matched requests can be marked fulfilled");
+            throw new InvalidRequestActionException("Only matched requests can be marked fulfilled");
         }
+
+        Donor donor = request.getMatchedDonor();
+        if (donor == null) {
+            throw new DonorNotFoundException("No donor matched to this request");
+        }
+        donor.setLastDonationDate(LocalDate.now());
+        donorRepo.save(donor);
 
         request.setStatus(Request.Status.FULFILLED);
         return mapToDto(requestRepo.save(request));
     }
 
+    @Transactional
     public RequestDTO rejectRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new RequestNotFoundException("Request not found"));
 
         if (request.getStatus() != Request.Status.MATCHED) {
-            throw new RuntimeException("Only matched requests can be rejected by donor");
+            throw new InvalidRequestActionException("Only matched requests can be rejected by donor");
         }
 
+        request.setMatchedDonor(null);
         request.setStatus(Request.Status.PENDING);
         return mapToDto(requestRepo.save(request));
     }
 
+    @Transactional
     public RequestDTO cancelRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new RequestNotFoundException("Request not found"));
 
         if (request.getStatus() == Request.Status.FULFILLED || request.getStatus() == Request.Status.EXPIRED) {
-            throw new RuntimeException("Cannot cancel a fulfilled or expired request");
+            throw new InvalidRequestActionException("Cannot cancel a fulfilled or expired request");
         }
 
+        request.setMatchedDonor(null);
         request.setStatus(Request.Status.CANCELLED);
         return mapToDto(requestRepo.save(request));
     }
 
-
-    public void deleteRequest(Long requestId) {
-        if (!requestRepo.existsById(requestId)) {
-            throw new RuntimeException("Request not found");
-        }
-        requestRepo.deleteById(requestId);
-    }
 
     private RequestDTO mapToDto(Request request) {
         return new RequestDTO(
                 request.getId(),
                 request.getRecipient().getId(),
                 request.getRecipient().getUser().getFullName(),
+                request.getMatchedDonor() != null ? request.getMatchedDonor().getId() : null,
+                request.getMatchedDonor() != null ? request.getMatchedDonor().getUser().getFullName() : null,
                 request.getBloodType(),
                 request.getLocation(),
                 request.getStatus(),
@@ -133,10 +174,4 @@ public class RequestService {
         );
     }
 
-    public void updateExpiredRequests() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Request> expired = requestRepo.findByStatusAndRequiredByBefore(Request.Status.PENDING, now);
-        expired.forEach(r -> r.setStatus(Request.Status.EXPIRED));
-        requestRepo.saveAll(expired);
-    }
 }

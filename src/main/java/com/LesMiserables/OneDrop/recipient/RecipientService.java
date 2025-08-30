@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.recipient;
 
+import com.LesMiserables.OneDrop.exceptions.RecipientNotFoundException;
 import com.LesMiserables.OneDrop.recipient.dto.RecipientRequestDTO;
 import com.LesMiserables.OneDrop.recipient.dto.RecipientResponseDTO;
 import com.LesMiserables.OneDrop.user.User;
@@ -22,7 +23,7 @@ public class RecipientService {
     // add new recipient
     public RecipientResponseDTO addRecipient(RecipientRequestDTO request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new RecipientNotFoundException("Recipient not found with id: " + request.getUserId()));
 
         Recipient recipient = Recipient.builder()
                 .bloodType(request.getBloodType())
@@ -56,7 +57,7 @@ public class RecipientService {
     // get recipient by ID
     public RecipientResponseDTO getRecipientById(Long id) {
         Recipient recipient = recipientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recipient not found with id: " + id));
+                .orElseThrow(() -> new RecipientNotFoundException("Recipient not found with id: " + id));
 
         return new RecipientResponseDTO(
                 recipient.getId(),
@@ -69,7 +70,7 @@ public class RecipientService {
     // delete recipient by ID
     public void deleteRecipient(Long id) {
         if (!recipientRepository.existsById(id)) {
-            throw new RuntimeException("Recipient not found with id: " + id);
+            throw new RecipientNotFoundException("Recipient not found with id: " + id);
         }
         recipientRepository.deleteById(id);
     }

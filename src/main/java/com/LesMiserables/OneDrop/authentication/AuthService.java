@@ -3,9 +3,9 @@ package com.LesMiserables.OneDrop.authentication;
 import com.LesMiserables.OneDrop.authentication.dto.AuthRequest;
 import com.LesMiserables.OneDrop.authentication.dto.AuthResponse;
 import com.LesMiserables.OneDrop.authentication.dto.RegisterRequest;
-import com.LesMiserables.OneDrop.authentication.exception.InvalidCredentialsException;
-import com.LesMiserables.OneDrop.authentication.exception.UnauthorisedActionException;
-import com.LesMiserables.OneDrop.authentication.exception.UserNotFoundException;
+import com.LesMiserables.OneDrop.exceptions.InvalidCredentialsException;
+import com.LesMiserables.OneDrop.exceptions.UnauthorisedAdminActionException;
+import com.LesMiserables.OneDrop.exceptions.UserNotFoundException;
 import com.LesMiserables.OneDrop.user.User;
 import com.LesMiserables.OneDrop.user.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (request.getRole() == User.Role.ADMIN) {
-            throw new UnauthorisedActionException("Cannot register as ADMIN");
+            throw new UnauthorisedAdminActionException("Cannot register as ADMIN");
         }
 
         var user = User.builder()
@@ -52,7 +52,7 @@ public class AuthService {
 
         // check user role during login
         if (user.getRole() != request.getRole()) {
-            throw new UnauthorisedActionException(
+            throw new UnauthorisedAdminActionException(
                     "You tried to log in as " + request.getRole() +
                     " but your account is registered as " + user.getRole()
             );

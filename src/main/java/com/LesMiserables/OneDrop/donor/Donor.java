@@ -23,7 +23,7 @@ public class Donor {
     @Column(nullable = true)
     private LocalDate lastDonationDate;
 
-    @Column(nullable = false)
+    @Transient
     public boolean isEligibleToDonate() {
         return lastDonationDate == null || lastDonationDate.isBefore(LocalDate.now().minusDays(90));
     }
