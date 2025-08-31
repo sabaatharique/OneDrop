@@ -1,19 +1,25 @@
-/* Set body background same as choose-profile page */
+/* Body as a flex container to center content vertically and horizontally */
 body {
     background: #fee2e2; /* same as choose-profile */
     font-family: Arial, sans-serif;
     color: #222;
+
+    display: flex;
+    justify-content: center; /* horizontal centering */
+    align-items: center;     /* vertical centering */
+    min-height: 100vh;       /* full viewport height */
+    margin: 0;               /* remove default body margin */
 }
 
 /* Auth card */
 .auth-container {
     width: 350px;
-    margin: 180px auto 0 auto; /* moves the card lower */
     padding: 30px;
-    background: #fff; /* card stays white */
+    background: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     border-radius: 8px;
     text-align: center;
+    margin: 0; /* remove manual margin */
 }
 
 .auth-container h2 {
@@ -25,13 +31,35 @@ body {
     flex-direction: column;
 }
 
-.auth-container input {
+/* Inputs */
+.auth-container input,
+.auth-container select {
     margin-bottom: 12px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 0.95rem;
 }
 
+/* Align label above date input slightly to the left */
+.auth-container label[for="last-donated"] {
+    display: block;
+    text-align: left;  /* align left instead of center */
+    margin-bottom: 4px; /* small gap from input */
+    margin-left: 2px;   /* optional slight left offset */
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Date picker */
+.auth-container input[type="date"] {
+    padding: 9px;
+    font-size: 0.95rem;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Button */
 .auth-container button {
     background: #dc2626;
     color: #fff;
@@ -39,14 +67,28 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 5px;
+    font-size: 1rem;
+    transition: background 0.2s ease-in-out;
 }
 
 .auth-container button:hover {
     background: #b91c1c;
 }
 
-/* Space between button and "Already have an account?" text */
+/* Space between button and paragraph */
 .auth-container form p {
     margin-top: 25px;
     font-size: 0.9rem;
+}
+
+/* Links inside paragraph */
+.auth-container form p a {
+    color: #dc2626;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-container form p a:hover {
+    text-decoration: underline;
 }

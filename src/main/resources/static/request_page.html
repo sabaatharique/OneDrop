@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneDrop | Blood Requests</title>
+    <link rel="stylesheet" href="assets/css/global.css" />
+    <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <style>
+        /* Filters Section */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .filters label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .filters select, .filters input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        /* Requests Table */
+        .table-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f3f4f6;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Responsive adjustments */
+        @media(max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            th, td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <h2>OneDrop</h2>
+        <nav>
+            <a href="donor_dash.html" class="active">Dashboard</a>
+            <a href="request_page.html">Find requests</a>
+            <a href="track_donations.html">Track Donations</a>
+            <a href="donation_calendar.html">Donation Calendar</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Blood Requests</h1>
+            <a href="profile_page.html" style="font-weight: bold; color: #000; text-decoration: none;">Profile</a>
+        </header>
+
+        <!-- Filters -->
+        <section class="filters">
+            <div>
+                <label for="bloodGroup">Blood Group:</label>
+                <select id="bloodGroup">
+                    <option value="">All</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="city">City:</label>
+                <input type="text" id="city" placeholder="Enter city">
+            </div>
+
+            <div>
+                <label for="location">Location:</label>
+                <input type="text" id="location" placeholder="Nearby location">
+            </div>
+
+            <button onclick="filterRequests()" class="btn">Filter</button>
+        </section>
+
+        <!-- Requests Table -->
+        <section class="tables">
+            <div class="table-container">
+                <table id="requestsTable">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Blood Group</th>
+                        <th>City</th>
+                        <th>Hospital / Location</th>
+                        <th>Contact</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td>A+</td>
+                        <td>Dhaka</td>
+                        <td>City Hospital</td>
+                        <td>+880123456789</td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td>O-</td>
+                        <td>Chittagong</td>
+                        <td>Care Center</td>
+                        <td>+880987654321</td>
+                    </tr>
+                    <tr>
+                        <td>Ali Khan</td>
+                        <td>B+</td>
+                        <td>Dhaka</td>
+                        <td>Health Clinic</td>
+                        <td>+880112233445</td>
+                    </tr>
+                    <tr>
+                        <td>Sara Williams</td>
+                        <td>AB+</td>
+                        <td>Khulna</td>
+                        <td>Community Hospital</td>
+                        <td>+880556677889</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function filterRequests() {
+        const bloodGroup = document.getElementById('bloodGroup').value.toUpperCase();
+        const city = document.getElementById('city').value.toLowerCase();
+        const location = document.getElementById('location').value.toLowerCase();
+
+        const table = document.getElementById('requestsTable');
+        const trs = table.tBodies[0].getElementsByTagName('tr');
+
+        for (let i = 0; i < trs.length; i++) {
+            const tds = trs[i].getElementsByTagName('td');
+            const bg = tds[1].textContent.toUpperCase();
+            const cty = tds[2].textContent.toLowerCase();
+            const loc = tds[3].textContent.toLowerCase();
+
+            let show = true;
+            if (bloodGroup && bg !== bloodGroup) show = false;
+            if (city && !cty.includes(city)) show = false;
+            if (location && !loc.includes(location)) show = false;
+
+            trs[i].style.display = show ? '' : 'none';
+        }
+    }
+</script>
+</body>
+</html>
