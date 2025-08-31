@@ -1,7 +1,58 @@
-.navbar {display: flex; justify-content: space-between; padding: 20px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
-.navbar nav a {margin-left: 15px;}
-.hero {text-align: center; padding: 80px 20px; background: #fee2e2;}
-.hero h1 {font-size: 2.5rem; margin-bottom: 10px;}
-.hero p {font-size: 1.1rem; margin-bottom: 20px;}
-.hero .btn {font-size: 1.1rem;}
-footer {text-align: center; padding: 15px; background: #fff; margin-top: 40px; box-shadow: 0 -2px 5px rgba(0,0,0,0.1);}
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* vertically center logo and links */
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Navbar links spacing */
+.navbar nav a {
+    margin-left: 15px;
+}
+
+/* Logo styling */
+.logo {
+    font-size: 2.2rem;    /* bigger size */
+    font-weight: bold;     /* bold text */
+}
+
+.logo .one {
+    color: #000;           /* black */
+}
+
+.logo .drop {
+    color: #dc2626;        /* red/drop color */
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+    background: #fee2e2;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.hero .btn {
+    font-size: 1.1rem;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #fff;
+    margin-top: 40px;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}

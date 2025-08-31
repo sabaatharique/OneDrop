@@ -1,6 +1,45 @@
-.auth-container {width: 350px; margin: 100px auto; padding: 30px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 8px; text-align: center;}
-.auth-container h2 {margin-bottom: 20px;}
-.auth-container form {display: flex; flex-direction: column;}
-.auth-container input {margin-bottom: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;}
-.auth-container button {background: #dc2626; color: #fff; padding: 10px; border: none; border-radius: 5px; cursor: pointer;}
-.auth-container button:hover {background: #b91c1c;}
+.auth-container {
+    width: 350px;
+    margin: 180px auto 0 auto; /* moves the card lower: 180px from top */
+    padding: 30px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.auth-container h2 {
+    margin-bottom: 20px;
+}
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-container input {
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.auth-container button {
+    background: #dc2626;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.auth-container button:hover {
+    background: #b91c1c;
+}
+
+/* Space between button and "Already have an account?" text */
+.auth-container form p {
+    margin-top: 25px; /* increases space below the button */
+    font-size: 0.9rem;
+}
+
