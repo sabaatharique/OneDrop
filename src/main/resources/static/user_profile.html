@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneDrop | Choose Profile</title>
+    <link rel="stylesheet" href="assets/css/global.css" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #fee2e2;
+            font-family: Arial, sans-serif;
+        }
+        .profile-container {
+            background: #fff;
+            padding: 40px 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .profile-container h2 {
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: #dc2626;
+        }
+        .profile-btn {
+            display: block;
+            width: 200px;
+            margin: 15px auto;
+            padding: 12px 0;
+            background: #dc2626;
+            color: white;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .profile-btn:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+<div class="profile-container">
+    <h2>Choose Your Profile</h2>
+    <button class="profile-btn" onclick="location.href='donor_dash.html'">Donor</button>
+    <button class="profile-btn" onclick="location.href='recipient_dash.html'">Recipient</button>
+</div>
+</body>
+</html>

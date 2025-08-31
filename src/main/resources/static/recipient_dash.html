@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="assets/js/dashboard.js"></script>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneDrop | Recipient Dashboard</title>
+    <link rel="stylesheet" href="assets/css/global.css" />
+    <link rel="stylesheet" href="assets/css/dashboard.css" />
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <h2>OneDrop</h2>
+        <nav>
+            <a href="dashboard-recipient.html" class="active">Dashboard</a>
+            <a href="donors.html">Donors</a>
+            <a href="recipients.html">Recipients</a>
+            <a href="requests.html">Requests</a>
+            <a href="matches.html">Matches</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Recipient Dashboard</h1>
+            <button class="logout-btn">Logout</button>
+        </header>
+
+        <!-- Stats cards relevant for recipients -->
+        <section class="stats">
+            <div class="card">Your Requests <span>5</span></div>
+            <div class="card">Approved Requests <span>2</span></div>
+            <div class="card">Pending Donations <span>3</span></div>
+            <div class="card">Matched Donors <span>4</span></div>
+        </section>
+
+        <!-- Tables -->
+        <section class="tables">
+            <div class="table-container">
+                <h2>Latest Requests</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Request Date</th>
+                        <th>Blood Type</th>
+                        <th>Status</th>
+                        <th>Hospital</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>01 Sep 2025</td><td>A+</td><td>Pending</td><td>City Hospital</td></tr>
+                    <tr><td>05 Sep 2025</td><td>O-</td><td>Approved</td><td>Care Center</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>
