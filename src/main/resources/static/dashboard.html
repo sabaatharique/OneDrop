@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneDrop | Dashboard</title>
+    <link rel="stylesheet" href="assets/css/global.css" />
+    <link rel="stylesheet" href="assets/css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>OneDrop</h2>
+            <nav>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="donors.html">Donors</a>
+                <a href="recipients.html">Recipients</a>
+                <a href="requests.html">Requests</a>
+                <a href="matches.html">Matches</a>
+                <a href="appointments.html">Appointments</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h1>Dashboard</h1>
+                <button class="logout-btn">Logout</button>
+            </header>
+
+            <section class="stats">
+                <div class="card">Donors <span>120</span></div>
+                <div class="card">Recipients <span>80</span></div>
+                <div class="card">Requests <span>50</span></div>
+                <div class="card">Matches <span>30</span></div>
+            </section>
+
+            <section class="tables">
+                <div class="table-container">
+                    <h2>Latest Requests</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Blood Type</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>John Doe</td><td>A+</td><td>Pending</td></tr>
+                            <tr><td>Jane Smith</td><td>O-</td><td>Approved</td></tr>
+                            <tr><td>Sam Wilson</td><td>B+</td><td>Matched</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <h2>Upcoming Appointments</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Donor</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Michael</td><td>02 Sep</td><td>City Hospital</td></tr>
+                            <tr><td>Sara</td><td>05 Sep</td><td>Care Center</td></tr>
+                            <tr><td>Alex</td><td>09 Sep</td><td>Health Clinic</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
