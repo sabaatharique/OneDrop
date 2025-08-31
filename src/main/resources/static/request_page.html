@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneDrop | Blood Requests</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f9fafb; color: #222; }
+        a { text-decoration: none; color: inherit; }
+
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 230px;
+            background: #dc2626;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 { margin-bottom: 20px; }
+        .sidebar nav a { color: white; padding: 10px 0; display: block; border-radius: 6px; }
+        .sidebar nav a.active, .sidebar nav a:hover { background: rgba(255,255,255,0.2); }
+
+        .main-content { flex: 1; padding: 20px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .filters label { font-weight: bold; margin-right: 5px; }
+        .filters select, .filters input, .filters button { padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+        .filters button { background: #dc2626; color: #fff; border: none; cursor: pointer; }
+        .filters button:hover { background: #b91c1c; }
+
+        /* Requests cards */
+        .requests-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .request-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .request-card h3 { color: #dc2626; font-size: 1.1rem; }
+        .request-card p { font-size: 0.95rem; color: #333; }
+
+        /* Map */
+        #map {
+            height: 400px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        @media(max-width: 768px) {
+            .filters { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <h2>OneDrop</h2>
+        <nav>
+            <a href="donor_dash.html">Dashboard</a>
+            <a href="request_page.html" class="active">Find Requests</a>
+            <a href="track_donations.html">Track Donations</a>
+            <a href="donation_calendar.html">Donation Calendar</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Blood Requests</h1>
+            <a href="profile_page.html">Profile</a>
+        </header>
+
+        <!-- Location Map -->
+        <input id="locationInput" placeholder="Search location" style="margin-bottom:10px; padding:8px; border-radius:5px; border:1px solid #ccc; width:100%;" />
+        <div id="map"></div>
+
+        <!-- Filters -->
+        <section class="filters">
+            <div>
+                <label for="bloodGroup">Blood Group:</label>
+                <select id="bloodGroup">
+                    <option value="">All</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
+            </div>
+            <div>
+                <label for="city">City:</label>
+                <input type="text" id="city" placeholder="Enter city">
+            </div>
+            <button onclick="filterRequests()">Filter</button>
+            <button onclick="resetFilters()">Reset</button>
+        </section>
+
+
+        <!-- Requests Cards -->
+        <section class="requests-cards" id="requestsContainer">
+            <div class="request-card" data-city="Dhaka" data-location="City Hospital">
+                <h3>John Doe</h3>
+                <p><strong>Blood Group:</strong> A+</p>
+                <p><strong>City:</strong> Dhaka</p>
+                <p><strong>Hospital:</strong> City Hospital</p>
+                <p><strong>Contact:</strong> +880123456789</p>
+            </div>
+            <div class="request-card" data-city="Chittagong" data-location="Care Center">
+                <h3>Jane Smith</h3>
+                <p><strong>Blood Group:</strong> O-</p>
+                <p><strong>City:</strong> Chittagong</p>
+                <p><strong>Hospital:</strong> Care Center</p>
+                <p><strong>Contact:</strong> +880987654321</p>
+            </div>
+            <div class="request-card" data-city="Dhaka" data-location="Health Clinic">
+                <h3>Ali Khan</h3>
+                <p><strong>Blood Group:</strong> B+</p>
+                <p><strong>City:</strong> Dhaka</p>
+                <p><strong>Hospital:</strong> Health Clinic</p>
+                <p><strong>Contact:</strong> +880112233445</p>
+            </div>
+            <div class="request-card" data-city="Khulna" data-location="Community Hospital">
+                <h3>Sara Williams</h3>
+                <p><strong>Blood Group:</strong> AB+</p>
+                <p><strong>City:</strong> Khulna</p>
+                <p><strong>Hospital:</strong> Community Hospital</p>
+                <p><strong>Contact:</strong> +880556677889</p>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Leaflet Map
+    const map = L.map('map').setView([23.8103, 90.4125], 12); // Default: Dhaka
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    let marker = L.marker([23.8103, 90.4125], { draggable: true }).addTo(map);
+
+    // Variables for filter
+    let selectedLocation = '';
+
+    async function searchLocation(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.length) {
+            const first = data[0];
+            const lat = parseFloat(first.lat);
+            const lon = parseFloat(first.lon);
+            map.setView([lat, lon], 14);
+            marker.setLatLng([lat, lon]);
+            selectedLocation = query.toLowerCase(); // store location for filtering
+            filterRequests(); // auto-filter after search
+        }
+    }
+
+    document.getElementById('locationInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') searchLocation(e.target.value);
+    });
+
+    marker.on('dragend', function (e) {
+        const pos = e.target.getLatLng();
+        selectedLocation = ''; // reset if user drags manually
+        filterRequests();
+    });
+
+    map.on('click', function (e) {
+        selectedLocation = ''; // reset selection on map click
+        filterRequests();
+    });
+
+    // Filter Function
+    function filterRequests() {
+        const bloodGroup = document.getElementById('bloodGroup').value.toUpperCase();
+        const cityInput = document.getElementById('city').value.toLowerCase();
+
+        const cards = document.getElementById('requestsContainer').children;
+
+        for (let card of cards) {
+            const bg = card.querySelector('p:nth-child(2)').textContent.split(':')[1].trim();
+            const city = card.dataset.city.toLowerCase();
+            const location = card.dataset.location.toLowerCase();
+
+            let show = true;
+            if (bloodGroup && bg !== bloodGroup) show = false;
+            if (cityInput && !city.includes(cityInput)) show = false;
+            if (selectedLocation && !city.includes(selectedLocation) && !location.includes(selectedLocation)) show = false;
+
+            card.style.display = show ? '' : 'none';
+        }
+    }
+    function resetFilters() {
+    document.getElementById('bloodGroup').value = '';
+    document.getElementById('city').value = '';
+    document.getElementById('locationInput').value = '';
+    selectedLocation = '';
+    filterRequests();
+}
+</script>
+</body>
+</html>

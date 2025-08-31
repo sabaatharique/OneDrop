@@ -6,27 +6,144 @@
     <title>OneDrop | Home</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/home.css" />
+    <style>
+        /* Info Cards Section */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 20px;
+        }
+
+        .info-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            width: 400px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-card h3 {
+            margin-bottom: 15px;
+            color: #dc2626;
+            font-size: 1.5rem;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        /* Stats Section */
+        .stats {
+            text-align: center;
+            padding: 50px 20px;
+            background: #f9fafb;
+        }
+
+        .stats h2 {
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            display: inline-block;
+            margin: 0 25px;
+        }
+
+        .stat-item h3 {
+            font-size: 2rem;
+            color: #dc2626;
+            margin-bottom: 5px;
+        }
+
+        .stat-item p {
+            font-size: 1rem;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
 <header class="navbar">
     <div class="logo">
         <span class="one">One</span><span class="drop">Drop</span>
     </div>
-    <nav>
-        <a href="login.html">Login</a>
-        <a href="register.html">Register</a>
-        <a href="user_profile.html" class="btn">Dashboard</a>
+    <nav id="nav-links">
+        <!-- Navbar links injected by JS -->
     </nav>
 </header>
 
-    <section class="hero">
-        <h1>Connecting Blood Donors and Recipients</h1>
-        <p>Find donors, manage requests, and save lives.</p>
-        <a href="user_profile.html" class="btn">Get Started</a>
-    </section>
+<section class="hero">
+    <h1>Connecting Blood Donors and Recipients</h1>
+    <p>Find donors, manage requests, and save lives.</p>
+    <a href="user_profile.html" class="btn">Get Started</a>
+</section>
 
-    <footer>
-        <p>© 2025 OneDrop. All rights reserved.</p>
-    </footer>
+<!-- Info Cards Section -->
+<section class="cards-container">
+    <div class="info-card">
+        <h3>Donors</h3>
+        <p>Join our community of blood donors and help save lives by contributing to those in need.</p>
+    </div>
+    <div class="info-card">
+        <h3>Recipients</h3>
+        <p>Easily find compatible blood donors and manage requests efficiently to get the help you need.</p>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+    <h2>Our Impact</h2>
+    <div class="stat-item">
+        <h3>1,250+</h3>
+        <p>People helped</p>
+    </div>
+    <div class="stat-item">
+        <h3>850+</h3>
+        <p>Donations completed</p>
+    </div>
+    <div class="stat-item">
+        <h3>500+</h3>
+        <p>Active donors</p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2025 OneDrop. All rights reserved.</p>
+</footer>
+
+<script>
+    // -------------------------------
+    // Dynamic Navbar JS
+    // -------------------------------
+
+    // Simulate user login state
+    const isLoggedIn = true; // set false for guest view
+
+    const nav = document.getElementById('nav-links');
+
+    // Clear current links
+    nav.innerHTML = '';
+
+    if (isLoggedIn) {
+        // Logged-in view: Dashboard + Profile
+        nav.innerHTML = `
+            <a href="user_profile.html" class="btn">Dashboard</a>
+
+        `;
+    } else {
+        // Guest view: Login + Register
+        nav.innerHTML = `
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        `;
+    }
+</script>
 </body>
 </html>
