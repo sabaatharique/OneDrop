@@ -54,7 +54,7 @@ public class MatchService {
                         donor.getId(),
                         donor.getUser().getFullName(),
                         donor.getBloodType(),
-                        donor.getCity(),
+                        donor.getLocation(),
                         0.0
                 ))
                 .toList();
@@ -118,7 +118,7 @@ public class MatchService {
 
     private boolean isCompatible(Donor donor, Request request) {
         return isBloodCompatible(donor.getBloodType(), request.getBloodType())
-                && isCityMatching(donor.getCity(), request.getLocation());
+                && isCityMatching(donor.getLocation(), request.getLocation());
     }
 
     private boolean isBloodCompatible(String donorBlood, String recipientBlood) {

@@ -29,7 +29,7 @@ public class Donor {
     }
 
     @Column(nullable = false)
-    private String city;
+    private String location;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)

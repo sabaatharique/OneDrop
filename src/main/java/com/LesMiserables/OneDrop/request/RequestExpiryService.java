@@ -13,6 +13,7 @@ public class RequestExpiryService {
 
     private final RequestRepository requestRepo;
 
+    // request exceeds required by time: PENDING/MATCHED -> EXPIRED
     @Scheduled(fixedRate = 60 * 60 * 1000)
     public void markExpiredRequests() {
         LocalDateTime now = LocalDateTime.now();

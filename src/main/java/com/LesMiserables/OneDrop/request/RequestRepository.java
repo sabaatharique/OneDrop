@@ -11,5 +11,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findByRecipientId(Long recipientId);
     List<Request> findByStatus(Request.Status status);
     List<Request> findByStatusAndRequiredByBefore(Request.Status status, LocalDateTime time);
-    List<Request> findByCityAndStatus(String city, Request.Status status);
+    List<Request> findByLocationAndStatus(String location, Request.Status status);
 }

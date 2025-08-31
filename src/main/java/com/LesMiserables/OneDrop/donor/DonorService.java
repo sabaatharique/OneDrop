@@ -28,7 +28,7 @@ public class DonorService {
 
         Donor donor = Donor.builder()
                 .bloodType(request.getBloodType())
-                .city(request.getCity())
+                .location(request.getCity())
                 .user(user)
                 .build();
 
@@ -37,7 +37,7 @@ public class DonorService {
         return new DonorResponseDTO(
                 saved.getId(),
                 saved.getBloodType(),
-                saved.getCity(),
+                saved.getLocation(),
                 saved.isEligibleToDonate(),
                 saved.getUser().getId()
         );
@@ -50,7 +50,7 @@ public class DonorService {
                 .map(d -> new DonorResponseDTO(
                         d.getId(),
                         d.getBloodType(),
-                        d.getCity(),
+                        d.getLocation(),
                         d.isEligibleToDonate(),
                         d.getUser().getId()
                 ))
@@ -65,7 +65,7 @@ public class DonorService {
         return new DonorResponseDTO(
                 donor.getId(),
                 donor.getBloodType(),
-                donor.getCity(),
+                donor.getLocation(),
                 donor.isEligibleToDonate(),
                 donor.getUser().getId()
         );

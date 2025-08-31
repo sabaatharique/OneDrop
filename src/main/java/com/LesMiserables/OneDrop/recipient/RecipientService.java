@@ -27,7 +27,7 @@ public class RecipientService {
 
         Recipient recipient = Recipient.builder()
                 .bloodType(request.getBloodType())
-                .city(request.getCity())
+                .location(request.getCity())
                 .user(user)
                 .build();
 
@@ -36,7 +36,7 @@ public class RecipientService {
         return new RecipientResponseDTO(
                 saved.getId(),
                 saved.getBloodType(),
-                saved.getCity(),
+                saved.getLocation(),
                 saved.getUser().getId()
         );
     }
@@ -48,7 +48,7 @@ public class RecipientService {
                 .map(d -> new RecipientResponseDTO(
                         d.getId(),
                         d.getBloodType(),
-                        d.getCity(),
+                        d.getLocation(),
                         d.getUser().getId()
                 ))
                 .collect(Collectors.toList());
@@ -62,7 +62,7 @@ public class RecipientService {
         return new RecipientResponseDTO(
                 recipient.getId(),
                 recipient.getBloodType(),
-                recipient.getCity(),
+                recipient.getLocation(),
                 recipient.getUser().getId()
         );
     }

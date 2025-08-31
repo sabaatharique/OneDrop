@@ -25,6 +25,7 @@ public class RequestService {
     private final RecipientRepository recipientRepo;
     private final DonorRepository donorRepo;
 
+    // recipient creates request: PENDING
     public RequestDTO createRequest(CreateRequestDTO dto) {
         Recipient recipient = recipientRepo.findById(dto.getRecipientId())
                 .orElseThrow(() -> new RecipientNotFoundException("Recipient with id " + dto.getRecipientId() + " not found"));
@@ -42,6 +43,7 @@ public class RequestService {
         return mapToDto(saved);
     }
 
+    // find all requests by a recipient
     public List<RequestDTO> getRequestsByRecipient(Long recipientId) {
         return requestRepo.findByRecipientId(recipientId)
                 .stream()
@@ -49,6 +51,7 @@ public class RequestService {
                 .collect(Collectors.toList());
     }
 
+    // get all pending requests
     public List<RequestDTO> getPendingRequests() {
         return requestRepo.findByStatus(Request.Status.PENDING)
                 .stream()
@@ -56,6 +59,7 @@ public class RequestService {
                 .collect(Collectors.toList());
     }
 
+    // update status or required by time for a request
     public RequestDTO updateRequest(Long requestId, UpdateRequestDTO dto) {
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RequestNotFoundException("Request with id " + requestId + " not found"));
@@ -71,6 +75,7 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
+    // delete request from database
     public void deleteRequest(Long requestId) {
         if (!requestRepo.existsById(requestId)) {
             throw new RequestNotFoundException("Request not found");
@@ -78,17 +83,19 @@ public class RequestService {
         requestRepo.deleteById(requestId);
     }
 
+    // show all pending requests based on location
     public List<RequestDTO> getPendingRequestsNearby(Long donorId) {
         Donor donor = donorRepo.findById(donorId)
                 .orElseThrow(() -> new DonorNotFoundException("Donor with id " + donorId + " not found"));
 
-        return requestRepo.findByCityAndStatus(donor.getCity(), Request.Status.PENDING)
+        return requestRepo.findByLocationAndStatus(donor.getLocation(), Request.Status.PENDING)
                 .stream()
-                .filter(r -> donor.isEligibleToDonate())
+                .filter(r -> donor.isEligibleToDonate()) // CLARIFY
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
+    // donor accepts request, matchedDonor added to request: PENDING -> MATCHED
     @Transactional
     public RequestDTO acceptRequest(Long requestId, Long donorId) {
         Donor donor = donorRepo.findById(donorId)
@@ -110,6 +117,7 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
+    // request fulfilled, donor's last donation set to now: MATCHED -> FULFILLED
     @Transactional
     public RequestDTO completeRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)
@@ -130,6 +138,7 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
+    // donor rejects request: MATCHED -> PENDING
     @Transactional
     public RequestDTO rejectRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)
@@ -144,6 +153,7 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
+    // donor cancels request: PENDING/MATCHED -> CANCELLED
     @Transactional
     public RequestDTO cancelRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)
