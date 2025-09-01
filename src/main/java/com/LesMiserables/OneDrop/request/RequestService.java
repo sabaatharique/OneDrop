@@ -51,6 +51,13 @@ public class RequestService {
                 .collect(Collectors.toList());
     }
 
+    public List<RequestDTO> getRequestsByDonor(Long donorId) {
+        return requestRepo.findByDonorId(donorId)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     // get all pending requests
     public List<RequestDTO> getPendingRequests() {
         return requestRepo.findByStatus(Request.Status.PENDING)
@@ -156,6 +163,21 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
+    // show upcoming accepted/matched requests for donor
+    public List<Request> getUpcomingRequestsForDonor(Long donorId) {
+        return requestRepo.findByMatchedDonorIdAndStatus(
+                donorId,
+                Request.Status.MATCHED
+        );
+    }
+
+    // fulfilled donation history for donor
+    public List<Request> getDonationHistoryForDonor(Long donorId) {
+        return requestRepo.findByMatchedDonorIdAndStatus(
+                donorId,
+                Request.Status.FULFILLED
+        );
+    }
 
     private RequestDTO mapToDto(Request request) {
         return new RequestDTO(

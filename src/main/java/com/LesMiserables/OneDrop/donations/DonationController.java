@@ -23,8 +23,7 @@ public class DonationController {
                         "status", appointment.getStatus(),
                         "hospital", appointment.getHospital(),
                         "recipientName", appointment.getRecipient().getUser().getFullName(),
-                        "recipientBloodType", appointment.getRecipient().getBloodType(),
-                        "recipientLocation", appointment.getRecipient().getLocation()
+                        "recipientBloodType", appointment.getRecipient().getBloodType()
                 )))
                 .orElse(ResponseEntity.noContent().build());
     }

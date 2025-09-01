@@ -26,6 +26,11 @@ public class RequestController {
         return ResponseEntity.ok(requestService.getRequestsByRecipient(recipientId));
     }
 
+    @GetMapping("/recipient/{donorId}")
+    public ResponseEntity<List<RequestDTO>> getRequestsByDonor(@PathVariable Long donorId) {
+        return ResponseEntity.ok(requestService.getRequestsByDonor(donorId));
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<List<RequestDTO>> getPendingRequests() {
         return ResponseEntity.ok(requestService.getPendingRequests());
@@ -63,5 +68,17 @@ public class RequestController {
     public ResponseEntity<Void> deleteRequest(@PathVariable Long requestId) {
         requestService.deleteRequest(requestId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/donor/{donorId}/upcoming")
+    public ResponseEntity<List<Request>> getUpcomingForDonor(@PathVariable Long donorId) {
+        List<Request> requests = requestService.getUpcomingRequestsForDonor(donorId);
+        return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/donor/{donorId}/history")
+    public ResponseEntity<List<Request>> getDonationHistory(@PathVariable Long donorId) {
+        List<Request> requests = requestService.getDonationHistoryForDonor(donorId);
+        return ResponseEntity.ok(requests);
     }
 }

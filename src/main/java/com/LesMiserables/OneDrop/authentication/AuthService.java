@@ -47,22 +47,29 @@ public class AuthService {
     }
 
     public AuthResponse login(AuthRequest request) {
-        var user = repo.findByEmail(request.getEmail())
+        User user = repo.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        // check user role during login
-        if (user.getRole() != request.getRole()) {
-            throw new UnauthorisedAdminActionException(
-                    "You tried to log in as " + request.getRole() +
-                    " but your account is registered as " + user.getRole()
-            );
-        }
-
+        // validate password
         if (!passwordEncoder().matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid password");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        if (user.getRole() == User.Role.ADMIN) {
+            throw new UnauthorisedAdminActionException("Admins cannot log in from this endpoint");
+        }
+
+        if ((user.getRole() == User.Role.DONOR && request.getRole() != User.Role.DONOR) ||
+                (user.getRole() == User.Role.RECIPIENT && request.getRole() != User.Role.RECIPIENT)) {
+            throw new UnauthorisedAdminActionException("This account is not registered as " + request.getRole().name());
+        }
+
+        if (user.getRole() == User.Role.BOTH &&
+                (request.getRole() != User.Role.DONOR && request.getRole() != User.Role.RECIPIENT)) {
+            throw new UnauthorisedAdminActionException("This account can only log in as DONOR or RECIPIENT");
+        }
+
+        String token = jwtUtil.generateToken(user.getEmail(), request.getRole().name());
         return new AuthResponse(token);
     }
 }
