@@ -4,8 +4,7 @@ import com.LesMiserables.OneDrop.location.Location;
 import lombok.Data;
 
 @Data
-public class DonorRequestDTO {
-    private Long userId;
-    private String bloodType;
+public class DonorLocationDTO {
     private Location location;
+    private double radiusKm;
 }

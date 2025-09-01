@@ -6,5 +6,4 @@ import lombok.Data;
 public class RecipientRequestDTO {
     private Long userId;
     private String bloodType;
-    private String city;
 }

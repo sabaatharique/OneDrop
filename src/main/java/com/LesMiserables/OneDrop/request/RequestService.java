@@ -83,18 +83,6 @@ public class RequestService {
         requestRepo.deleteById(requestId);
     }
 
-    // show all pending requests based on location
-    public List<RequestDTO> getPendingRequestsNearby(Long donorId) {
-        Donor donor = donorRepo.findById(donorId)
-                .orElseThrow(() -> new DonorNotFoundException("Donor with id " + donorId + " not found"));
-
-        return requestRepo.findByLocationAndStatus(donor.getLocation(), Request.Status.PENDING)
-                .stream()
-                .filter(r -> donor.isEligibleToDonate()) // CLARIFY
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
-
     // donor accepts request, matchedDonor added to request: PENDING -> MATCHED
     @Transactional
     public RequestDTO acceptRequest(Long requestId, Long donorId) {
@@ -153,7 +141,7 @@ public class RequestService {
         return mapToDto(requestRepo.save(request));
     }
 
-    // donor cancels request: PENDING/MATCHED -> CANCELLED
+    // recipient cancels request: PENDING/MATCHED -> CANCELLED
     @Transactional
     public RequestDTO cancelRequest(Long requestId) {
         Request request = requestRepo.findById(requestId)

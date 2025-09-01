@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.donor.dto;
 
+import com.LesMiserables.OneDrop.location.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import lombok.Data;
 public class DonorResponseDTO {
     private Long id;
     private String bloodType;
-    private String city;
     private boolean eligibleToDonate;
     private Long userId;
+    private Location location;
 }

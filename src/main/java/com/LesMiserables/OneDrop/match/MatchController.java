@@ -20,34 +20,23 @@ public class MatchController {
 
     private final MatchService matchService;
 
-    // Donor views compatible requests
+    // Donor views compatible requests with optional radius
     @GetMapping("/donor/{donorId}")
-    public ResponseEntity<List<DonorMatchDTO>> getMatchesForDonor(@PathVariable Long donorId) {
-        List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId);
-        return ResponseEntity.ok(matches);
-    }
-
-    // Recipient views compatible donors
-    @GetMapping("/request/{requestId}")
-    public ResponseEntity<List<RequestMatchDTO>> getMatchesForRequest(@PathVariable Long requestId) {
-        List<RequestMatchDTO> matches = matchService.findMatchesForRequest(requestId);
-        return ResponseEntity.ok(matches);
-    }
-
-    // Donor updates match status: ACCEPTED, REJECTED, FULFILLED
-    @PostMapping("/{matchId}/action")
-    public ResponseEntity<Match> donorAction(
-            @PathVariable Long matchId,
-            @RequestParam Match.Status action
+    public ResponseEntity<List<DonorMatchDTO>> getMatchesForDonor(
+            @PathVariable Long donorId,
+            @RequestParam(defaultValue = "50") double radiusKm
     ) {
-        Match updatedMatch = matchService.handleDonorAction(matchId, action);
-        return ResponseEntity.ok(updatedMatch);
+        List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId, radiusKm);
+        return ResponseEntity.ok(matches);
     }
 
-    // Recipient cancels a request
-    @PostMapping("/request/{requestId}/cancel")
-    public ResponseEntity<Void> cancelRequest(@PathVariable Long requestId) {
-        matchService.cancelRequest(requestId);
-        return ResponseEntity.noContent().build();
+    // Recipient views compatible donors with optional radius
+    @GetMapping("/request/{requestId}")
+    public ResponseEntity<List<RequestMatchDTO>> getMatchesForRequest(
+            @PathVariable Long requestId,
+            @RequestParam(defaultValue = "50") double radiusKm
+    ) {
+        List<RequestMatchDTO> matches = matchService.findMatchesForRequest(requestId, radiusKm);
+        return ResponseEntity.ok(matches);
     }
 }

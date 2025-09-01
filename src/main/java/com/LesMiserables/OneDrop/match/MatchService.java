@@ -2,16 +2,19 @@ package com.LesMiserables.OneDrop.match;
 
 import com.LesMiserables.OneDrop.donor.Donor;
 import com.LesMiserables.OneDrop.donor.DonorRepository;
+import com.LesMiserables.OneDrop.location.Location;
+import com.LesMiserables.OneDrop.location.LocationUtil;
 import com.LesMiserables.OneDrop.match.dto.DonorMatchDTO;
 import com.LesMiserables.OneDrop.match.dto.RequestMatchDTO;
 import com.LesMiserables.OneDrop.request.Request;
 import com.LesMiserables.OneDrop.request.RequestRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class MatchService {
@@ -19,106 +22,91 @@ public class MatchService {
     private final RequestRepository requestRepo;
     private final DonorRepository donorRepo;
     private final MatchRepository matchRepo;
+    private LocationUtil locUtil;
 
-    // Donor views compatible requests
-    public List<DonorMatchDTO> findMatchesForDonor(Long donorId) {
+    // Donor views compatible requests nearby
+    public List<DonorMatchDTO> findMatchesForDonor(Long donorId, double radiusKm) {
         Donor donor = donorRepo.findById(donorId)
                 .orElseThrow(() -> new RuntimeException("Donor not found"));
+
+        Location donorLocation = donor.getLocation();
+        if (donorLocation == null) throw new RuntimeException("Donor location not set");
 
         List<Request> pendingRequests = requestRepo.findByStatus(Request.Status.PENDING);
 
         return pendingRequests.stream()
-                .filter(req -> isCompatible(donor, req))
-                .sorted(Comparator.comparing(Request::getRequiredBy)) // sort by urgency
+                // filter by blood compatibility
+                .filter(req -> isBloodCompatible(donor.getBloodType(), req.getBloodType()))
+                // filter by distance within radius
+                .filter(req -> locUtil.distance(donorLocation, req.getLocation()) <= radiusKm)
+                // sort by distance first, then urgency
+                .sorted(Comparator
+                        .comparing((Request req) -> locUtil.distance(donorLocation, req.getLocation()))
+                        .thenComparing(Request::getRequiredBy))
                 .map(req -> new DonorMatchDTO(
                         req.getId(),
                         req.getRecipient().getUser().getFullName(),
                         req.getBloodType(),
                         req.getLocation(),
                         req.getRequiredBy(),
-                        0.0
+                        locUtil.distance(donorLocation, req.getLocation())
                 ))
                 .toList();
     }
 
-    // Recipient views compatible donors
-    public List<RequestMatchDTO> findMatchesForRequest(Long requestId) {
+    // Recipient views compatible donors nearby
+    public List<RequestMatchDTO> findMatchesForRequest(Long requestId, double radiusKm) {
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        Location requestLocation = request.getLocation();
+        if (requestLocation == null) throw new RuntimeException("Request location not set");
 
         List<Donor> donors = donorRepo.findAll();
 
         return donors.stream()
-                .filter(donor -> isCompatible(donor, request))
+                .filter(donor -> isBloodCompatible(donor.getBloodType(), request.getBloodType()))
+                .filter(donor -> donor.getLocation() != null &&
+                        locUtil.distance(donor.getLocation(), requestLocation) <= radiusKm)
+                .sorted(Comparator
+                        .comparing((Donor donor) -> locUtil.distance(donor.getLocation(), requestLocation)))
                 .map(donor -> new RequestMatchDTO(
                         donor.getId(),
                         donor.getUser().getFullName(),
                         donor.getBloodType(),
                         donor.getLocation(),
-                        0.0
+                        locUtil.distance(donor.getLocation(), requestLocation)
                 ))
                 .toList();
     }
 
-
-    // Donor action: ACCEPT, REJECT, FULFILLED
-    public Match handleDonorAction(Long matchId, Match.Status action) {
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
-
-        match.setStatus(action);
-        matchRepo.save(match);
-
-        updateRequestStatusBasedOnMatches(match.getRequest());
-
-        return match;
-    }
-
-    // Recipient cancels request
-    public void cancelRequest(Long requestId) {
+    // Create a match (donor accepts request)
+    @Transactional
+    public Match acceptRequest(Long donorId, Long requestId) {
+        Donor donor = donorRepo.findById(donorId)
+                .orElseThrow(() -> new RuntimeException("Donor not found"));
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        request.setStatus(Request.Status.CANCELLED);
-        requestRepo.save(request);
-
-        matchRepo.findByRequest(request).forEach(match -> {
-            match.setStatus(Match.Status.CANCELLED);
-            matchRepo.save(match);
-        });
-    }
-
-    // update request based on matches
-    private void updateRequestStatusBasedOnMatches(Request request) {
-        List<Match> matches = matchRepo.findByRequest(request);
-
-        if (matches.isEmpty()) {
-            request.setStatus(Request.Status.PENDING);
-        } else {
-            boolean anyAccepted = matches.stream()
-                    .anyMatch(m -> m.getStatus() == Match.Status.ACCEPTED);
-            boolean allFulfilled = matches.stream()
-                    .allMatch(m -> m.getStatus() == Match.Status.FULFILLED);
-            boolean allCancelledOrRejected = matches.stream()
-                    .allMatch(m -> m.getStatus() == Match.Status.CANCELLED || m.getStatus() == Match.Status.REJECTED);
-
-            if (allFulfilled) {
-                request.setStatus(Request.Status.FULFILLED);
-            } else if (anyAccepted) {
-                request.setStatus(Request.Status.MATCHED);
-            } else if (allCancelledOrRejected) {
-                request.setStatus(Request.Status.PENDING);
-            } else {
-                request.setStatus(Request.Status.PENDING);
-            }
+        if (!donor.isEligibleToDonate()) {
+            throw new RuntimeException("Donor not eligible");
+        }
+        if (request.getStatus() != Request.Status.PENDING) {
+            throw new RuntimeException("Request is not pending");
         }
 
-        requestRepo.save(request);
-    }
+        // create match
+        Match match = new Match();
+        match.setDonor(donor);
+        match.setRequest(request);
+        match.setMatchedAt(LocalDateTime.now());
+        matchRepo.save(match);
 
-    private boolean isCompatible(Donor donor, Request request) {
-        return isBloodCompatible(donor.getBloodType(), request.getBloodType())
-                && isCityMatching(donor.getLocation(), request.getLocation());
+        // update request status
+        request.setStatus(Request.Status.MATCHED);
+        requestRepo.save(request);
+
+        return match;
     }
 
     private boolean isBloodCompatible(String donorBlood, String recipientBlood) {
@@ -131,14 +119,10 @@ public class MatchService {
             case "B-" -> donorBlood.equalsIgnoreCase("O-") || donorBlood.equalsIgnoreCase("B-");
             case "B+" -> donorBlood.equalsIgnoreCase("O-") || donorBlood.equalsIgnoreCase("O+")
                     || donorBlood.equalsIgnoreCase("B-") || donorBlood.equalsIgnoreCase("B+");
-            case "AB-"-> donorBlood.equalsIgnoreCase("O-") || donorBlood.equalsIgnoreCase("A-")
+            case "AB-" -> donorBlood.equalsIgnoreCase("O-") || donorBlood.equalsIgnoreCase("A-")
                     || donorBlood.equalsIgnoreCase("B-") || donorBlood.equalsIgnoreCase("AB-");
             case "AB+" -> true;
             default -> false;
         };
-    }
-
-    private boolean isCityMatching(String donorCity, String requestCity) {
-        return donorCity.equalsIgnoreCase(requestCity);
     }
 }

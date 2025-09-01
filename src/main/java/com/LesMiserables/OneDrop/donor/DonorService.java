@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.donor;
 
+import com.LesMiserables.OneDrop.donor.dto.DonorLocationDTO;
 import com.LesMiserables.OneDrop.exceptions.DonorNotFoundException;
 import com.LesMiserables.OneDrop.user.User;
 import com.LesMiserables.OneDrop.user.UserRepository;
@@ -28,7 +29,6 @@ public class DonorService {
 
         Donor donor = Donor.builder()
                 .bloodType(request.getBloodType())
-                .location(request.getCity())
                 .user(user)
                 .build();
 
@@ -37,9 +37,26 @@ public class DonorService {
         return new DonorResponseDTO(
                 saved.getId(),
                 saved.getBloodType(),
-                saved.getLocation(),
                 saved.isEligibleToDonate(),
-                saved.getUser().getId()
+                saved.getUser().getId(),
+                saved.getLocation()
+        );
+    }
+
+    // auto update current location
+    public DonorResponseDTO updateDonorLocation(Long donorId, DonorLocationDTO location) {
+        Donor donor = donorRepository.findById(donorId)
+                .orElseThrow(() -> new DonorNotFoundException("Donor not found"));
+
+        donor.setLocation(location.getLocation());
+        donorRepository.save(donor);
+
+        return new DonorResponseDTO(
+                donor.getId(),
+                donor.getBloodType(),
+                donor.isEligibleToDonate(),
+                donor.getUser().getId(),
+                donor.getLocation()
         );
     }
 
@@ -50,9 +67,9 @@ public class DonorService {
                 .map(d -> new DonorResponseDTO(
                         d.getId(),
                         d.getBloodType(),
-                        d.getLocation(),
                         d.isEligibleToDonate(),
-                        d.getUser().getId()
+                        d.getUser().getId(),
+                        d.getLocation()
                 ))
                 .collect(Collectors.toList());
     }
@@ -65,9 +82,9 @@ public class DonorService {
         return new DonorResponseDTO(
                 donor.getId(),
                 donor.getBloodType(),
-                donor.getLocation(),
                 donor.isEligibleToDonate(),
-                donor.getUser().getId()
+                donor.getUser().getId(),
+                donor.getLocation()
         );
     }
 

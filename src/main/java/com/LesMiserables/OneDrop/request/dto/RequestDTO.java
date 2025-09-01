@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.request.dto;
 
+import com.LesMiserables.OneDrop.location.Location;
 import com.LesMiserables.OneDrop.request.Request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class RequestDTO {
     private Long donorId;
     private String donorName;
     private String bloodType;
-    private String location;
+    private Location location;
     private Request.Status status;
     private LocalDateTime createdAt;
     private LocalDateTime requiredBy;

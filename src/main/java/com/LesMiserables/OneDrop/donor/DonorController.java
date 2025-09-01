@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.donor;
 
+import com.LesMiserables.OneDrop.donor.dto.DonorLocationDTO;
 import com.LesMiserables.OneDrop.donor.dto.DonorRequestDTO;
 import com.LesMiserables.OneDrop.donor.dto.DonorResponseDTO;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,12 @@ public class DonorController {
 
     public DonorController(DonorService donorService) {
         this.donorService = donorService;
+    }
+
+    @PatchMapping("/{id}/location")
+    public ResponseEntity<DonorResponseDTO> updateLocation(@PathVariable Long id, @RequestBody DonorLocationDTO location) {
+        DonorResponseDTO updated = donorService.updateDonorLocation(id, location);
+        return ResponseEntity.ok(updated);
     }
 
     @PostMapping

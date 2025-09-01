@@ -1,6 +1,7 @@
 package com.LesMiserables.OneDrop.request;
 
 import com.LesMiserables.OneDrop.donor.Donor;
+import com.LesMiserables.OneDrop.location.Location;
 import com.LesMiserables.OneDrop.recipient.Recipient;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,8 +29,9 @@ public class Request {
     @Column(nullable = false)
     private String bloodType;
 
+    @Embedded
     @Column(nullable = false)
-    private String location;
+    private Location location;
 
     @Column(nullable = false)
     private LocalDateTime requiredBy;

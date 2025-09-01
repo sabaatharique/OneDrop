@@ -8,6 +8,5 @@ import lombok.Data;
 public class RecipientResponseDTO {
     private Long id;
     private String bloodType;
-    private String city;
     private Long userId;
 }

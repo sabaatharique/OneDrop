@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.donor;
 
+import com.LesMiserables.OneDrop.location.Location;
 import com.LesMiserables.OneDrop.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,8 +29,8 @@ public class Donor {
         return lastDonationDate == null || lastDonationDate.isBefore(LocalDate.now().minusDays(90));
     }
 
-    @Column(nullable = false)
-    private String location;
+    @Transient
+    private Location location;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)

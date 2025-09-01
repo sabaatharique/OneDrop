@@ -12,6 +12,5 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     List<Match> findByRequest(Request request);
     List<Match> findByDonor(Donor donor);
-    List<Match> findByStatus(Match.Status status);
     boolean existsByDonorAndRequest(Donor donor, Request request);
 }

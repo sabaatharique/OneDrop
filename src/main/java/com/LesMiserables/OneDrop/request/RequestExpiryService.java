@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -15,12 +18,13 @@ public class RequestExpiryService {
 
     // request exceeds required by time: PENDING/MATCHED -> EXPIRED
     @Scheduled(fixedRate = 60 * 60 * 1000)
+    @Transactional
     public void markExpiredRequests() {
         LocalDateTime now = LocalDateTime.now();
-        List<Request> expiredRequests = requestRepo.findByStatusAndRequiredByBefore(Request.Status.PENDING, now);
+        List<Request.Status> statuses = Arrays.asList(Request.Status.PENDING, Request.Status.MATCHED);
+        List<Request> expiredRequests = requestRepo.findByStatusInAndRequiredByBefore(statuses, now);
         expiredRequests.forEach(r -> r.setStatus(Request.Status.EXPIRED));
 
         requestRepo.saveAll(expiredRequests);
-        // System.out.println("Marked " + expiredRequests.size() + " requests as EXPIRED");
     }
 }

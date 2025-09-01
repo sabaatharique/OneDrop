@@ -26,11 +26,4 @@ public class Match {
     private Donor donor;
 
     private LocalDateTime matchedAt;
-
-    @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING;
-
-    public enum Status {
-        PENDING, ACCEPTED, REJECTED, FULFILLED, CANCELLED
-    }
 }
