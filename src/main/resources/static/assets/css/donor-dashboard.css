@@ -1,0 +1,99 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f9fafb;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #b91c1c;
+}
+
+h2 {
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Eligibility Card */
+.eligibility-card {
+    padding: 15px;
+    background: #e5f7ff;
+    border: 1px solid #38bdf8;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Appointment Card */
+.appointment-card {
+    padding: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #f3f4f6;
+    margin-bottom: 15px;
+    font-size: 15px;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+.primary-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.success-btn {
+    background: #16a34a;
+    color: white;
+}
+
+.cancel-btn {
+    background: #dc2626;
+    color: white;
+}
+
+/* Booking Form */
+.booking-form {
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.booking-form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.booking-form input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
