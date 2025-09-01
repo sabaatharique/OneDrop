@@ -45,14 +45,15 @@ public class RequestService {
 
     // find all requests by a recipient
     public List<RequestDTO> getRequestsByRecipient(Long recipientId) {
-        return requestRepo.findByRecipientId(recipientId)
+        return requestRepo.findByRecipient_Id(recipientId)
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
+    // find all requests by donor
     public List<RequestDTO> getRequestsByDonor(Long donorId) {
-        return requestRepo.findByDonorId(donorId)
+        return requestRepo.findByMatchedDonor_Id(donorId)
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -165,7 +166,7 @@ public class RequestService {
 
     // show upcoming accepted/matched requests for donor
     public List<Request> getUpcomingRequestsForDonor(Long donorId) {
-        return requestRepo.findByMatchedDonorIdAndStatus(
+        return requestRepo.findByMatchedDonor_IdAndStatus(
                 donorId,
                 Request.Status.MATCHED
         );
@@ -173,7 +174,7 @@ public class RequestService {
 
     // fulfilled donation history for donor
     public List<Request> getDonationHistoryForDonor(Long donorId) {
-        return requestRepo.findByMatchedDonorIdAndStatus(
+        return requestRepo.findByMatchedDonor_IdAndStatus(
                 donorId,
                 Request.Status.FULFILLED
         );
