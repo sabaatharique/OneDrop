@@ -36,12 +36,53 @@
                         <th>Hospital</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr><td>John Doe</td><td>A+</td><td>45</td><td>01 Sep 2025</td><td>City Hospital</td></tr>
-                    <tr><td>Jane Smith</td><td>O-</td><td>32</td><td>05 Sep 2025</td><td>Care Center</td></tr>
-                    <tr><td>Sam Wilson</td><td>B+</td><td>28</td><td>09 Sep 2025</td><td>Health Clinic</td></tr>
-                    <tr><td>Linda Brown</td><td>AB+</td><td>36</td><td>12 Sep 2025</td><td>Community Hospital</td></tr>
+                    <tbody id="recipientsBody">
+                    <!-- Dynamic rows will be inserted here -->
                     </tbody>
+
+                    <script>
+                        const apiBase = "http://localhost:9090"; // Your Spring Boot base URL
+                        const recipientsBody = document.getElementById("recipientsBody");
+
+                        // Fetch all recipients from backend
+                        async function fetchRecipients() {
+                            try {
+                                const res = await fetch(`${apiBase}/recipients`);
+                                if (!res.ok) throw new Error("Failed to fetch recipients");
+                                const data = await res.json();
+
+                                // Clear table body
+                                recipientsBody.innerHTML = "";
+
+                                if (!data || data.length === 0) {
+                                    const tr = document.createElement("tr");
+                                    tr.innerHTML = `<td colspan="5" style="text-align:center; padding:10px;">No recipients found</td>`;
+                                    recipientsBody.appendChild(tr);
+                                    return;
+                                }
+
+                                // Populate table dynamically
+                                data.forEach(r => {
+                                    const tr = document.createElement("tr");
+                                    tr.innerHTML = `
+                                        <td>${r.name}</td>
+                                        <td>${r.bloodType}</td>
+                                        <td>${r.age ?? '-'}</td>
+                                        <td>${r.requestedDate ? new Date(r.requestedDate).toLocaleDateString() : '-'}</td>
+                                        <td>${r.hospital ?? '-'}</td>
+                                    `;
+                                    recipientsBody.appendChild(tr);
+                                });
+                            } catch (err) {
+                                console.error(err);
+                                recipientsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:10px;">Failed to load recipients</td></tr>`;
+                            }
+                        }
+
+                        // Initialize
+                        fetchRecipients();
+                    </script>
+
                 </table>
             </div>
         </section>
