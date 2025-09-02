@@ -113,35 +113,59 @@
 
         <!-- Requests Cards -->
         <section class="requests-cards" id="requestsContainer">
-            <div class="request-card" data-city="Dhaka" data-location="City Hospital">
-                <h3>John Doe</h3>
-                <p><strong>Blood Group:</strong> A+</p>
-                <p><strong>City:</strong> Dhaka</p>
-                <p><strong>Hospital:</strong> City Hospital</p>
-                <p><strong>Contact:</strong> +880123456789</p>
-            </div>
-            <div class="request-card" data-city="Chittagong" data-location="Care Center">
-                <h3>Jane Smith</h3>
-                <p><strong>Blood Group:</strong> O-</p>
-                <p><strong>City:</strong> Chittagong</p>
-                <p><strong>Hospital:</strong> Care Center</p>
-                <p><strong>Contact:</strong> +880987654321</p>
-            </div>
-            <div class="request-card" data-city="Dhaka" data-location="Health Clinic">
-                <h3>Ali Khan</h3>
-                <p><strong>Blood Group:</strong> B+</p>
-                <p><strong>City:</strong> Dhaka</p>
-                <p><strong>Hospital:</strong> Health Clinic</p>
-                <p><strong>Contact:</strong> +880112233445</p>
-            </div>
-            <div class="request-card" data-city="Khulna" data-location="Community Hospital">
-                <h3>Sara Williams</h3>
-                <p><strong>Blood Group:</strong> AB+</p>
-                <p><strong>City:</strong> Khulna</p>
-                <p><strong>Hospital:</strong> Community Hospital</p>
-                <p><strong>Contact:</strong> +880556677889</p>
-            </div>
+            <!-- Dynamic request cards will be loaded here -->
         </section>
+
+        <script>
+            async function loadRequests() {
+                try {
+                    const response = await fetch("http://localhost:9090/recipients");
+                    const recipients = await response.json();
+
+                    const container = document.getElementById("requestsContainer");
+                    container.innerHTML = "";
+
+                    // If no data, show a message but keep the UI clean
+                    if (!recipients || recipients.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align:center; padding: 20px; color: gray; font-size: 18px;">
+                                No recipient requests found
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // Create cards dynamically
+                    recipients.forEach(recipient => {
+                        const card = document.createElement("div");
+                        card.classList.add("request-card");
+                        card.setAttribute("data-city", recipient.city);
+                        card.setAttribute("data-location", recipient.location);
+
+                        card.innerHTML = `
+                            <h3>${recipient.recipientName}</h3>
+                            <p><strong>Blood Group:</strong> ${recipient.bloodType}</p>
+                            <p><strong>City:</strong> ${recipient.city}</p>
+                            <p><strong>Hospital:</strong> ${recipient.location}</p>
+                            <p><strong>Contact:</strong> ${recipient.contact}</p>
+                        `;
+
+                        container.appendChild(card);
+                    });
+                } catch (error) {
+                    console.error("Error fetching recipient data:", error);
+                    document.getElementById("requestsContainer").innerHTML = `
+                        <div style="text-align:center; padding: 20px; color: red;">
+                            Failed to load data. Please try again later.
+                        </div>
+                    `;
+                }
+            }
+
+            // Load requests when page loads
+            document.addEventListener("DOMContentLoaded", loadRequests);
+        </script>
+
     </main>
 </div>
 

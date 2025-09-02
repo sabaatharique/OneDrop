@@ -1,56 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="assets/js/dashboard.js"></script>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OneDrop | Requests</title>
+    <title>OneDrop | Create Request</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
-    <link rel="stylesheet" href="assets/css/requests.css" />
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            color: #c62828;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #c62828;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #a31515;
+        }
+
+        .message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #c62828;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 <div class="dashboard-container">
     <aside class="sidebar">
         <h2>OneDrop</h2>
         <nav>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="donors.html">Donors</a>
-            <a href="recipients.html">Recipients</a>
-            <a href="requests.html" class="active">Requests</a>
-            <a href="matches.html">Matches</a>
+            <a href="recipient_dash.html">Dashboard</a>
+            <a href="create_request.html" class="active">Create Request</a>
+            <a href="request_track.html">Request Update</a>
+            <a href="request_hist.html">Request History</a>
         </nav>
     </aside>
 
     <main class="main-content">
         <header class="topbar">
-            <h1>Requests</h1>
-            <button class="logout-btn">Logout</button>
+            <h1>Create Blood Request</h1>
+            <a href="recipient_dash.html" class="back-btn">← Back to Dashboard</a>
         </header>
 
-        <section class="tables">
-            <div class="table-container">
-                <h2>All Requests</h2>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Blood Type</th>
-                        <th>Requested Date</th>
-                        <th>Status</th>
-                        <th>Hospital</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr><td>John Doe</td><td>A+</td><td>01 Sep 2025</td><td>Pending</td><td>City Hospital</td></tr>
-                    <tr><td>Jane Smith</td><td>O-</td><td>05 Sep 2025</td><td>Approved</td><td>Care Center</td></tr>
-                    <tr><td>Sam Wilson</td><td>B+</td><td>09 Sep 2025</td><td>Matched</td><td>Health Clinic</td></tr>
-                    <tr><td>Linda Brown</td><td>AB+</td><td>12 Sep 2025</td><td>Pending</td><td>Community Hospital</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <section class="form-container">
+            <h2>Fill Out Request Form</h2>
+            <form id="createRequestForm">
+                <div class="form-group">
+                    <label for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" name="patientName" placeholder="Enter patient's name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bloodGroup">Blood Group</label>
+                    <select id="bloodGroup" name="bloodGroup" required>
+                        <option value="" disabled selected>Select blood group</option>
+                        <option>A+</option>
+                        <option>A-</option>
+                        <option>B+</option>
+                        <option>B-</option>
+                        <option>O+</option>
+                        <option>O-</option>
+                        <option>AB+</option>
+                        <option>AB-</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city" placeholder="Enter city" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="hospital">Hospital</label>
+                    <input type="text" id="hospital" name="hospital" placeholder="Enter hospital name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Required Date</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact">Contact Number</label>
+                    <input type="text" id="contact" name="contact" placeholder="+8801XXXXXXXXX" required>
+                </div>
+
+                <button type="submit">Submit Request</button>
+                <div class="message" id="responseMessage"></div>
+            </form>
         </section>
     </main>
 </div>
+
+<script>
+    document.getElementById("createRequestForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const requestData = {
+            patientName: document.getElementById("patientName").value,
+            bloodGroup: document.getElementById("bloodGroup").value,
+            city: document.getElementById("city").value,
+            hospital: document.getElementById("hospital").value,
+            requiredDate: document.getElementById("date").value,
+            contact: document.getElementById("contact").value
+        };
+
+        try {
+            const response = await fetch("http://localhost:9090/recipients/requests", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestData)
+            });
+
+            const messageElement = document.getElementById("responseMessage");
+            if (response.ok) {
+                messageElement.style.color = "green";
+                messageElement.textContent = "Request submitted successfully!";
+                document.getElementById("createRequestForm").reset();
+            } else {
+                messageElement.style.color = "red";
+                messageElement.textContent = "Failed to submit request.";
+            }
+        } catch (error) {
+            document.getElementById("responseMessage").style.color = "red";
+            document.getElementById("responseMessage").textContent = "Server error. Try again later.";
+        }
+    });
+</script>
 </body>
 </html>

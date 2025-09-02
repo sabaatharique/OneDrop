@@ -33,14 +33,15 @@
 
         /* Stats Section */
         .stats {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
           margin-bottom: 30px;
+          max-width: 350px;
         }
         .card {
           background: #fff;
-          padding: 40px;
+          padding: 30px;
           border-radius: 10px;
           box-shadow: 0 2px 5px rgba(0,0,0,0.1);
           font-weight: bold;
@@ -54,6 +55,25 @@
           font-size: 2rem;
           color: #dc2626;
           margin-top: 10px;
+        }
+
+        /* Past Donations Section */
+        #past-donations-section {
+          display: none;
+          margin-top: 15px;
+          background: #fff;
+          padding: 15px;
+          border-radius: 10px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #past-donations-list {
+          list-style: none;
+          padding: 0;
+        }
+        #past-donations-list li {
+          margin-bottom: 8px;
+          font-size: 0.95rem;
+          color: #333;
         }
 
         /* Requests Section */
@@ -136,8 +156,20 @@
 
         <!-- Stats cards -->
         <section class="stats">
-            <div class="card">Your Donations <span id="total-donations">0</span></div>
-            <div class="card">Upcoming Donations <span id="upcoming-count">0</span></div>
+            <div class="card">
+                Your Donations
+                <span id="total-donations">0</span>
+                <button id="show-past-btn" class="btn" style="margin-top: 12px;">View Past Donations</button>
+                <section id="past-donations-section">
+                    <h4 style="color:#dc2626; margin-bottom:10px;">Past Donations</h4>
+                    <ul id="past-donations-list"></ul>
+                </section>
+            </div>
+
+            <div class="card">
+                Upcoming Donations
+                <span id="upcoming-count">0</span>
+            </div>
         </section>
 
         <!-- Upcoming Appointment Section -->
@@ -171,6 +203,10 @@
     const recipientBloodEl = document.getElementById("recipient-blood");
     const recipientLocationEl = document.getElementById("recipient-location");
     const cancelBtn = document.getElementById("cancel-btn");
+
+    const pastBtn = document.getElementById("show-past-btn");
+    const pastSection = document.getElementById("past-donations-section");
+    const pastList = document.getElementById("past-donations-list");
 
     // Fetch donor's appointment
     async function fetchAppointment() {
@@ -250,6 +286,24 @@
       if (res.ok) {
         alert("Appointment cancelled!");
         fetchAppointment();
+      }
+    });
+
+    // Toggle past donations
+    pastBtn.addEventListener("click", async () => {
+      if (pastSection.style.display === "none" || pastSection.style.display === "") {
+        const res = await fetch(`${apiBase}/donations/past/${donorId}`);
+        if (res.ok) {
+          const data = await res.json();
+          pastList.innerHTML = data.length > 0
+            ? data.map(d => `<li>${d.date} — ${d.hospital} — ${d.bloodType}</li>`).join("")
+            : "<li>No past donations found</li>";
+          pastSection.style.display = "block";
+          pastBtn.textContent = "Hide Past Donations";
+        }
+      } else {
+        pastSection.style.display = "none";
+        pastBtn.textContent = "View Past Donations";
       }
     });
 

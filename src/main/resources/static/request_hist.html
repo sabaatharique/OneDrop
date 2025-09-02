@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDrop | Request History</title>
+    <link rel="stylesheet" href="assets/css/global.css" />
+    <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <style>
+        .table-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #dc2626;
+            color: white;
+        }
+        tr:hover { background: #f1f1f1; }
+        .empty-message {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <h2>OneDrop</h2>
+        <nav>
+            <a href="recipient_dash.html">Dashboard</a>
+            <a href="requests.html">Create Request</a>
+            <a href="request_track.html">Request Update</a>
+            <a href="request_hist.html" class="active">Request History</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Request History</h1>
+        </header>
+
+        <div class="table-container">
+            <h2>Your Past Requests</h2>
+            <table id="historyTable">
+                <thead>
+                <tr>
+                    <th>Request Date</th>
+                    <th>Blood Type</th>
+                    <th>Status</th>
+                    <th>Hospital</th>
+                </tr>
+                </thead>
+                <tbody id="historyBody">
+                <!-- Data will populate here -->
+                </tbody>
+            </table>
+            <div id="emptyMessage" class="empty-message hidden">No past requests found.</div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const historyBody = document.getElementById("historyBody");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const apiBase = "http://localhost:9090"; // Adjust if different
+    const recipientId = 1; // Replace with logged-in recipient ID
+
+    async function fetchRequestHistory() {
+        try {
+            const res = await fetch(`${apiBase}/recipients`);
+            const data = await res.json();
+
+            // Filter only current recipient's requests if needed
+            const requests = data.filter(r => r.recipientId === recipientId);
+
+            if(requests.length === 0){
+                emptyMessage.classList.remove("hidden");
+                return;
+            }
+
+            requests.forEach(req => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${new Date(req.requestedDate).toLocaleDateString()}</td>
+                    <td>${req.bloodType}</td>
+                    <td>${req.status}</td>
+                    <td>${req.hospital}</td>
+                `;
+                historyBody.appendChild(tr);
+            });
+        } catch(err){
+            emptyMessage.textContent = "Failed to fetch request history.";
+            emptyMessage.classList.remove("hidden");
+        }
+    }
+
+    // Initialize
+    fetchRequestHistory();
+</script>
+</body>
+</html>

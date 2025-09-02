@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDrop | Request Tracking</title>
+    <link rel="stylesheet" href="assets/css/global.css" />
+    <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <style>
+        .table-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #dc2626;
+            color: white;
+        }
+        tr:hover { background-color: #f1f1f1; }
+        .empty-message {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+        }
+        .status-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: default;
+            color: white;
+            font-weight: bold;
+        }
+        .status-pending { background: #f59e0b; }
+        .status-approved { background: #16a34a; }
+        .status-rejected { background: #dc2626; }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <h2>OneDrop</h2>
+        <nav>
+            <a href="recipient_dash.html">Dashboard</a>
+            <a href="requests.html">Create Request</a>
+            <a href="request_track.html" class="active">Request Update</a>
+            <a href="request_hist.html">Request History</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Track Your Requests</h1>
+        </header>
+
+        <div class="table-container">
+            <h2>Your Requests Status</h2>
+            <table id="trackTable">
+                <thead>
+                <tr>
+                    <th>Request Date</th>
+                    <th>Blood Type</th>
+                    <th>Status</th>
+                    <th>Hospital</th>
+                    <th>Last Updated</th>
+                </tr>
+                </thead>
+                <tbody id="trackBody">
+                <!-- Rows will be dynamically added -->
+                </tbody>
+            </table>
+            <div id="emptyMessage" class="empty-message hidden">No requests found.</div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const trackBody = document.getElementById("trackBody");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const apiBase = "http://localhost:9090"; // Your Spring Boot API base
+    const recipientId = 1; // Replace with logged-in recipient ID
+
+    function getStatusClass(status){
+        switch(status.toLowerCase()){
+            case 'pending': return 'status-pending';
+            case 'approved': return 'status-approved';
+            case 'rejected': return 'status-rejected';
+            default: return '';
+        }
+    }
+
+    async function fetchRequestTrack(){
+        try {
+            const res = await fetch(`${apiBase}/recipients`);
+            const data = await res.json();
+
+            const requests = data.filter(r => r.recipientId === recipientId);
+
+            if(requests.length === 0){
+                emptyMessage.classList.remove("hidden");
+                return;
+            }
+
+            requests.forEach(req => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${new Date(req.requestedDate).toLocaleDateString()}</td>
+                    <td>${req.bloodType}</td>
+                    <td><span class="status-btn ${getStatusClass(req.status)}">${req.status}</span></td>
+                    <td>${req.hospital}</td>
+                    <td>${req.lastUpdated ? new Date(req.lastUpdated).toLocaleString() : '-'}</td>
+                `;
+                trackBody.appendChild(tr);
+            });
+
+        } catch(err){
+            emptyMessage.textContent = "Failed to fetch request data.";
+            emptyMessage.classList.remove("hidden");
+        }
+    }
+
+    // Initialize
+    fetchRequestTrack();
+</script>
+</body>
+</html>

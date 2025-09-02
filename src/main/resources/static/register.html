@@ -10,24 +10,14 @@
 <body>
 <div class="auth-container">
     <h2>Register</h2>
-    <form>
-        <!-- Full Name -->
-        <input type="text" placeholder="Full Name" required />
+    <form id="registerForm">
+        <input type="text" id="fullName" placeholder="Full Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <input type="tel" id="phone" placeholder="+88 Phone Number" pattern="(\+88)?0[0-9]{9}" required />
+        <input type="text" id="location" placeholder="Location" required />
 
-        <!-- Email -->
-        <input type="email" placeholder="Email" required />
-
-        <!-- Password -->
-        <input type="password" placeholder="Password" required />
-
-        <!-- Phone Number -->
-        <input type="tel" placeholder="+88 Phone Number" pattern="(\+88)?0[0-9]{9}" required />
-
-        <!-- Location -->
-        <input type="text" placeholder="Location" required />
-
-        <!-- Blood Group -->
-        <select required>
+        <select id="bloodGroup" required>
             <option value="" disabled selected>Select Blood Group</option>
             <option value="A+">A+</option>
             <option value="A-">A-</option>
@@ -39,18 +29,59 @@
             <option value="AB-">AB-</option>
         </select>
 
-        <!-- Last Donated -->
-        <label for="last-donated">Last Donated (Optional)</label>
-        <input type="date" id="last-donated" name="last-donated" />
+        <label for="lastDonated">Last Donated (Optional)</label>
+        <input type="date" id="lastDonated" />
 
-
-        <!-- Register Button -->
         <button type="submit">Register</button>
-
         <p>Already have an account? <a href="login.html">Login</a></p>
+
+        <div id="message" style="margin-top:10px; font-weight:bold;"></div>
     </form>
 </div>
+
+<script>
+    const form = document.getElementById("registerForm");
+    const message = document.getElementById("message");
+    const apiBase = "http://localhost:9090/api/auth";
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            fullName: document.getElementById("fullName").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+            phone: document.getElementById("phone").value,
+            location: document.getElementById("location").value,
+            bloodGroup: document.getElementById("bloodGroup").value,
+            lastDonated: document.getElementById("lastDonated").value || null
+        };
+
+        try {
+            const res = await fetch(`${apiBase}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if(res.ok){
+                const data = await res.json();
+                localStorage.setItem("jwtToken", data.token);
+                message.style.color = "green";
+                message.textContent = "Registration successful! Redirecting to dashboard...";
+
+                // Redirect default to donor dashboard
+                setTimeout(() => window.location.href = "donor_dash.html", 1000);
+            } else {
+                const errText = await res.text();
+                message.style.color = "red";
+                message.textContent = errText || "Registration failed!";
+            }
+        } catch(err){
+            message.style.color = "red";
+            message.textContent = "Server error. Try again later.";
+        }
+    });
+</script>
 </body>
 </html>
-
-
