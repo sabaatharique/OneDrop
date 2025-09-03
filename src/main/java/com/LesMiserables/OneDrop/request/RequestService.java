@@ -180,7 +180,12 @@ public class RequestService {
         );
     }
 
-    private RequestDTO mapToDto(Request request) {
+    public Request getRequestById(Long requestId) {
+        return requestRepo.findById(requestId)
+                .orElseThrow(() -> new RequestNotFoundException("Request with id " + requestId + " not found"));
+    }
+
+    public RequestDTO mapToDto(Request request) {
         return new RequestDTO(
                 request.getId(),
                 request.getRecipient().getId(),

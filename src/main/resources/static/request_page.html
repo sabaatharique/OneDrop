@@ -113,91 +113,7 @@
             <!-- Dynamic request cards will be loaded here -->
         </section>
 
-        <script>
-            async function loadRequests() {
-                try {
-                    const donorId = localStorage.getItem('userId'); // Assuming donorId is stored in localStorage
-                    if (!donorId) {
-                        console.error("Donor ID not found in localStorage.");
-                        document.getElementById("requestsContainer").innerHTML = `
-                            <div style="text-align:center; padding: 20px; color: red;">
-                                Please log in as a donor to view requests.
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    const currentLatLng = marker.getLatLng();
-                    const latitude = currentLatLng.lat;
-                    const longitude = currentLatLng.lng;
-                    const radiusKm = 50; // Default radius, can be made dynamic later
-
-                    const response = await fetch(`/api/matches/donor/${donorId}?latitude=${latitude}&longitude=${longitude}&radiusKm=${radiusKm}`);
-                    const matches = await response.json(); // Renamed from recipients to matches
-
-                    const container = document.getElementById("requestsContainer");
-                    container.innerHTML = "";
-
-                    if (!matches || matches.length === 0) {
-                        container.innerHTML = `
-                            <div style="text-align:center; padding: 20px; color: gray; font-size: 18px;">
-                                No matching requests found nearby.
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    matches.forEach(match => { // Iterate through matches
-                        const card = document.createElement("div");
-                        card.classList.add("request-card");
-                        // Use data from DonorMatchDTO
-                        card.innerHTML = `
-                            <h3>${match.recipientName}</h3>
-                            <p><strong>Blood Group:</strong> ${match.bloodType}</p>
-                            <p><strong>Hospital:</strong> ${match.location.address || 'N/A'}</p>
-                            <p><strong>Required By:</strong> ${new Date(match.requiredBy).toLocaleDateString()}</p>
-                            <p><strong>Distance:</strong> ${match.distanceKm.toFixed(2)} km</p>
-                            <button onclick="acceptRequest(${match.requestId})">Accept Request</button>
-                        `;
-                        container.appendChild(card);
-                    });
-                } catch (error) {
-                    console.error("Error fetching matching requests:", error);
-                    document.getElementById("requestsContainer").innerHTML = `
-                        <div style="text-align:center; padding: 20px; color: red;">
-                            Failed to load data. Please try again later.
-                        </div>
-                    `;
-                }
-            }
-
-            // Placeholder for acceptRequest function - will need to implement this later
-            async function acceptRequest(requestId) {
-                const donorId = localStorage.getItem('userId');
-                if (!donorId) {
-                    alert("Please log in as a donor to accept requests.");
-                    return;
-                }
-                try {
-                    const response = await fetch(`/api/matches/${requestId}/accept?donorID=${donorId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (response.ok) {
-                        alert("Request accepted successfully!");
-                        loadRequests(); // Reload requests to update status
-                    } else {
-                        const errorData = await response.json();
-                        alert(`Failed to accept request: ${errorData.message || response.statusText}`);
-                    }
-                } catch (error) {
-                    console.error("Error accepting request:", error);
-                    alert("Server error. Could not accept request.");
-                }
-            }
-        </script>
+        
 
     </main>
 </div>
@@ -205,6 +121,22 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Check user role and active profile
+    document.addEventListener('DOMContentLoaded', function() {
+        const userRole = localStorage.getItem('userRole');
+        const activeProfile = localStorage.getItem('activeProfile');
+
+        // If user is only a RECIPIENT, or is BOTH but active profile is RECIPIENT, redirect
+        if (userRole === 'RECIPIENT' || (userRole === 'BOTH' && activeProfile === 'RECIPIENT')) {
+            alert('This page is for donors. Redirecting to recipient dashboard.');
+            window.location.href = 'recipient_dash.html';
+            return;
+        }
+
+        // If user is a DONOR or BOTH (and active profile is DONOR), proceed with loading requests
+        loadRequests();
+    });
+
     // Leaflet Map
     const map = L.map('map').setView([23.8103, 90.4125], 12); // Default: Dhaka
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -212,8 +144,22 @@
     }).addTo(map);
     let marker = L.marker([23.8103, 90.4125], { draggable: true }).addTo(map);
 
-    // Variables for filter
+    // Variables
     let selectedLocation = '';
+
+    document.getElementById('locationInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') searchLocation(e.target.value);
+    });
+
+    marker.on('dragend', function () {
+        selectedLocation = '';
+        loadRequests();
+    });
+
+    map.on('click', function () {
+        selectedLocation = '';
+        loadRequests();
+    });
 
     async function searchLocation(query) {
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
@@ -225,54 +171,150 @@
             const lon = parseFloat(first.lon);
             map.setView([lat, lon], 14);
             marker.setLatLng([lat, lon]);
-            selectedLocation = query.toLowerCase(); // store location for filtering
-            loadRequests(); // auto-filter after search
+            selectedLocation = query.toLowerCase();
+            loadRequests();
         }
     }
 
-    document.getElementById('locationInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') searchLocation(e.target.value);
-    });
-
-    marker.on('dragend', function (e) {
-        const pos = e.target.getLatLng();
-        selectedLocation = ''; // reset if user drags manually
-        loadRequests(); // Call loadRequests to update based on new marker position
-    });
-
-    map.on('click', function (e) {
-        selectedLocation = ''; // reset selection on map click
-        loadRequests(); // Call loadRequests to update based on new map click position
-    });
-
-    // Filter Function
     function filterRequests() {
         const bloodGroup = document.getElementById('bloodGroup').value.toUpperCase();
-        // cityInput removed
-
         const cards = document.getElementById('requestsContainer').children;
 
         for (let card of cards) {
-            // Assuming blood group is the second <p> tag
             const bgElement = card.querySelector('p:nth-child(2)');
             const bg = bgElement ? bgElement.textContent.split(':')[1].trim() : '';
-
-            let show = true;
-            if (bloodGroup && bg !== bloodGroup) show = false;
-            // cityInput filtering removed
-            // selectedLocation filtering will be handled by loadRequests based on map position
-
-            card.style.display = show ? '' : 'none';
+            card.style.display = (bloodGroup && bg !== bloodGroup) ? 'none' : '';
         }
     }
+
     function resetFilters() {
-    document.getElementById('bloodGroup').value = '';
-    // document.getElementById('city').value = ''; // Removed
-    document.getElementById('locationInput').value = '';
-    selectedLocation = '';
-    // After resetting filters, we should reload requests based on current map position
-    loadRequests();
+        document.getElementById('bloodGroup').value = '';
+        document.getElementById('locationInput').value = '';
+        selectedLocation = '';
+        loadRequests();
+    }
+
+    async function loadRequests() {
+    const container = document.getElementById("requestsContainer");
+    container.innerHTML = ""; // clear container
+
+    const donorId = localStorage.getItem('userId'); // Donor ID
+    if (!donorId) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 20px; color: red;">
+                Please log in as a donor to view requests.
+            </div>`;
+        return;
+    }
+
+    const currentLatLng = marker.getLatLng();
+    const latitude = currentLatLng.lat;
+    const longitude = currentLatLng.lng;
+    const address = document.getElementById('locationInput').value || "Unknown";
+    const radiusKm = 10; // Default radius, can be made dynamic
+
+    try {
+        const token = localStorage.getItem('jwtToken');
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`/api/matches/donor/${donorId}?latitude=${latitude}&longitude=${longitude}&address=${encodeURIComponent(address)}&radiusKm=${radiusKm}`, {
+            headers: headers
+        });
+
+        if (!response.ok) {
+            console.error(`Error fetching matches: ${response.status} ${response.statusText}`);
+            container.innerHTML = `
+                <div style="text-align:center; padding: 20px; color: red;">
+                    Failed to load data. Please try again later.
+                </div>`;
+            return;
+        }
+
+        let matches = [];
+        try {
+            matches = await response.json(); // parse JSON safely
+        } catch (jsonError) {
+            console.warn("Response is not valid JSON, using empty array");
+            matches = [];
+        }
+
+        if (!matches || matches.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 20px; color: gray; font-size: 18px;">
+                    No matching requests found nearby.
+                </div>`;
+            return;
+        }
+
+        matches.forEach(match => {
+            const card = document.createElement("div");
+            card.classList.add("request-card");
+            card.innerHTML = `
+                <h3>${match.patientName}</h3>
+                <p><strong>Blood Group:</strong> ${match.bloodType}</p>
+                <p><strong>Hospital / Location:</strong> ${match.location?.address || 'N/A'}</p>
+                <p><strong>Required By:</strong> ${new Date(match.requiredBy).toLocaleDateString()}</p>
+                <p><strong>Distance:</strong> ${match.distanceKm?.toFixed(2) || 'N/A'} km</p>
+                <button onclick="acceptRequest(${match.requestId})">Accept Request</button>
+            `;
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Error fetching matching requests:", error);
+        container.innerHTML = `
+            <div style="text-align:center; padding: 20px; color: red;">
+                Failed to load data. Please try again later.
+            </div>`;
+    }
 }
+
+    async function acceptRequest(requestId) {
+    const donorId = localStorage.getItem('userId');
+    if (!donorId) {
+        alert("Please log in as a donor to accept requests.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('jwtToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`/api/requests/${requestId}/accept?donorID=${donorId}`, {
+            method: 'PUT',
+            headers: headers
+        });
+
+        if (response.ok) {
+            alert("Request accepted successfully!");
+            loadRequests();
+        } else {
+            let errorMsg = response.statusText;
+            try {
+                const errData = await response.json();
+                errorMsg = errData.message || errorMsg;
+            } catch { /* ignore JSON parse errors */ }
+            alert(`Failed to accept request: ${errorMsg}`);
+        }
+    } catch (error) {
+        console.error("Error accepting request:", error);
+        alert("Server error. Could not accept request.");
+    }
+}
+
+
+    // Initial load
+    loadRequests();
 </script>
 </body>
 </html>

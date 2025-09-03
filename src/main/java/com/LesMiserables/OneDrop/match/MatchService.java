@@ -46,6 +46,7 @@ public class MatchService {
                 .map(req -> new DonorMatchDTO(
                         req.getId(),
                         req.getRecipient().getUser().getFullName(),
+                        req.getPatientName(),
                         req.getBloodType(),
                         req.getLocation(),
                         req.getRequiredBy(),

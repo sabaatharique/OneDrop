@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.request;
 
+import com.LesMiserables.OneDrop.match.MatchService;
 import com.LesMiserables.OneDrop.request.dto.CreateRequestDTO;
 import com.LesMiserables.OneDrop.request.dto.RequestDTO;
 import com.LesMiserables.OneDrop.request.dto.UpdateRequestDTO;
@@ -15,6 +16,7 @@ import java.util.List;
 public class RequestController {
 
     private final RequestService requestService;
+    private final MatchService matchService;
 
     @PostMapping
     public ResponseEntity<RequestDTO> createRequest(@RequestBody CreateRequestDTO dto) {
@@ -26,7 +28,7 @@ public class RequestController {
         return ResponseEntity.ok(requestService.getRequestsByRecipient(recipientId));
     }
 
-    @GetMapping("/recipient/{donorId}")
+    @GetMapping("/donors/{donorId}")
     public ResponseEntity<List<RequestDTO>> getRequestsByDonor(@PathVariable Long donorId) {
         return ResponseEntity.ok(requestService.getRequestsByDonor(donorId));
     }
@@ -46,7 +48,8 @@ public class RequestController {
 
     @PutMapping("/{requestId}/accept")
     public ResponseEntity<RequestDTO> acceptRequest(@PathVariable Long requestId, @RequestParam Long donorID) {
-        return ResponseEntity.ok(requestService.acceptRequest(requestId, donorID));
+        matchService.acceptRequest(donorID, requestId);
+        return ResponseEntity.ok(requestService.mapToDto(requestService.getRequestById(requestId)));
     }
 
     @PutMapping("/{requestId}/complete")

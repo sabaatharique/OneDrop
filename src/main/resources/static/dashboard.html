@@ -72,5 +72,22 @@
             </section>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutButton = document.querySelector('.logout-btn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function() {
+                    // Clear all relevant items from localStorage
+                    localStorage.removeItem('jwtToken');
+                    localStorage.removeItem('userRole');
+                    localStorage.removeItem('userId');
+                    localStorage.removeItem('recipientId');
+                    localStorage.removeItem('donorId');
+                    // Redirect to the login page or home page
+                    window.location.href = 'index.html'; // Redirect to index.html
+                });
+            }
+        });
+    </script>
 </body>
 </html>

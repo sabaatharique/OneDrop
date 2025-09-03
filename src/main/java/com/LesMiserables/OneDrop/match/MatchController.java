@@ -41,7 +41,7 @@ public class MatchController {
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam String address,
-            @RequestParam(defaultValue = "50") double radiusKm
+            @RequestParam(defaultValue = "10") double radiusKm
     ) {
         Location donorLocation = new Location(latitude, longitude, address);
         List<RequestMatchDTO> matches = matchService.findMatchesForRequest(requestId, donorLocation, radiusKm);
