@@ -6,8 +6,54 @@
     <title>OneDrop | Login</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/auth.css" />
+    <style>
+        /* Logo */
+        .logo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #000;
+            z-index: 1000;
+        }
+        .logo .one {
+            color: black;
+        }
+        .logo .drop {
+            color: #dc2626;
+        }
+
+        /* Back to home button */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 1000;
+        }
+        .back-btn:hover {
+            background: #b91c1c;
+        }
+    </style>
 </head>
 <body>
+
+<!-- Logo -->
+<div class="logo">
+    <span class="one">One</span><span class="drop">Drop</span>
+</div>
+
+<!-- Back to Home Button -->
+<button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
+
 <div class="auth-container">
     <h2>Login</h2>
     <form id="loginForm">
