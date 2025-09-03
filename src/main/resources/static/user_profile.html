@@ -42,6 +42,13 @@
         .profile-btn:hover {
             background: #b91c1c;
         }
+        .logout-btn {
+            background: #ccc;
+            color: #333;
+        }
+        .logout-btn:hover {
+            background: #999;
+        }
     </style>
 </head>
 <body>
@@ -49,6 +56,9 @@
     <h2>Choose Your Profile</h2>
     <button class="profile-btn" onclick="location.href='donor_dash.html'">Donor</button>
     <button class="profile-btn" onclick="location.href='recipient_dash.html'">Recipient</button>
+    <button class="profile-btn logout-btn" onclick="logout()">Logout</button>
 </div>
+
+<script src="assets/js/logout.js"></script>
 </body>
 </html>

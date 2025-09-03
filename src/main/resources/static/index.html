@@ -122,20 +122,24 @@
     // -------------------------------
     // Dynamic Navbar JS
     // -------------------------------
-
-    // Simulate user login state
-    const isLoggedIn = true; // set false for guest view
-
     const nav = document.getElementById('nav-links');
+    const token = localStorage.getItem('jwtToken');
+    const userRole = localStorage.getItem('userRole');
 
     // Clear current links
     nav.innerHTML = '';
 
-    if (isLoggedIn) {
+    if (token) {
+        let dashboardUrl = "#";
+        if (userRole === "DONOR") {
+            dashboardUrl = "donor_dash.html";
+        } else if (userRole === "RECIPIENT") {
+            dashboardUrl = "recipient_dash.html";
+        }
         // Logged-in view: Dashboard + Profile
         nav.innerHTML = `
-            <a href="user_profile.html" class="btn">Dashboard</a>
-
+            <a href="${dashboardUrl}" class="btn">Dashboard</a>
+            <a href="user_profile.html" class="btn">Profile</a>
         `;
     } else {
         // Guest view: Login + Register

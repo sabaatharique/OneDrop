@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/requests").hasAnyAuthority("ADMIN", "RECIPIENT")
                         .requestMatchers("/api/donations/**").hasAnyAuthority("ADMIN", "DONOR")
                         .requestMatchers("/api/matches/**").hasAnyAuthority("ADMIN", "DONOR", "RECIPIENT")
+                        .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/assets/**", "/*.html").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

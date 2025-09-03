@@ -24,53 +24,7 @@
     </form>
 </div>
 
-<script>
-    const form = document.getElementById("loginForm");
-    const message = document.getElementById("message");
-    const apiBase = "http://localhost:9090/api/auth";
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const payload = {
-            email: document.getElementById("email").value,
-            password: document.getElementById("password").value,
-            role: document.getElementById("role").value
-        };
-
-        try {
-            const response = await fetch(`${apiBase}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                // Save JWT to localStorage or cookie
-                localStorage.setItem("jwtToken", data.token);
-
-                message.style.color = "green";
-                message.textContent = "Login successful! Redirecting...";
-
-                // Redirect based on role
-                if(payload.role === "DONOR") {
-                    setTimeout(() => window.location.href = "donor_dash.html", 1000);
-                } else if(payload.role === "RECIPIENT") {
-                    setTimeout(() => window.location.href = "recipient_dash.html", 1000);
-                }
-
-            } else {
-                const errText = await response.text();
-                message.style.color = "red";
-                message.textContent = errText || "Login failed!";
-            }
-        } catch (err) {
-            message.style.color = "red";
-            message.textContent = "Server error. Try again later.";
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="assets/js/auth.js"></script>
 </body>
 </html>
-
