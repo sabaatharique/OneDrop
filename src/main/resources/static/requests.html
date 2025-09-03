@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,69 +6,76 @@
     <title>OneDrop | Create Request</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
         .form-container {
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 25px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+          max-width: 600px;
+          margin: 30px auto;
+          padding: 25px;
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
         .form-container h2 {
-            text-align: center;
-            color: #c62828;
-            margin-bottom: 20px;
+          text-align: center;
+          color: #c62828;
+          margin-bottom: 20px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+          margin-bottom: 15px;
         }
 
         label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
+          display: block;
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: #333;
         }
 
         input, select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 16px;
+          width: 100%;
+          padding: 10px;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+          font-size: 16px;
         }
 
         button {
-            width: 100%;
-            background-color: #c62828;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.2s;
+          width: 100%;
+          background-color: #c62828;
+          color: white;
+          padding: 12px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: 0.2s;
         }
 
         button:hover {
-            background-color: #a31515;
+          background-color: #a31515;
         }
 
         .message {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: bold;
+          margin-top: 15px;
+          text-align: center;
+          font-weight: bold;
         }
 
         .back-btn {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #c62828;
-            font-weight: bold;
+          display: inline-block;
+          margin-top: 15px;
+          text-decoration: none;
+          color: #c62828;
+          font-weight: bold;
+        }
+
+        #map {
+          height: 300px;
+          border-radius: 10px;
+          margin-top: 10px;
         }
     </style>
 </head>
@@ -79,7 +85,7 @@
         <h2>OneDrop</h2>
         <nav>
             <a href="recipient_dash.html">Dashboard</a>
-            <a href="requests.html" class="active">Create Request</a>
+            <a href="create_request.html" class="active">Create Request</a>
             <a href="request_track.html">Request Update</a>
             <a href="request_hist.html">Request History</a>
         </nav>
@@ -124,10 +130,25 @@
                     <input type="text" id="hospital" name="hospital" placeholder="Enter hospital name" required>
                 </div>
 
+                <!-- Map Integration -->
+                <div class="form-group">
+                    <label>Select Hospital Location</label>
+                    <div id="map"></div>
+                </div>
+
                 <div class="form-group">
                     <label for="date">Required Date</label>
                     <input type="date" id="date" name="date" required>
                 </div>
+
+                <div class="form-group">
+                    <label for="contact">Contact Number</label>
+                    <input type="text" id="contact" name="contact" placeholder="+8801XXXXXXXXX" required>
+                </div>
+
+                <!-- Hidden lat/lng fields -->
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
 
                 <button type="submit">Submit Request</button>
                 <div class="message" id="responseMessage"></div>
@@ -136,45 +157,73 @@
     </main>
 </div>
 
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Leaflet Map
+    const map = L.map('map').setView([23.8103, 90.4125], 12); // Default: Dhaka
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker = L.marker([23.8103, 90.4125], { draggable: true }).addTo(map);
+
+    function updateLatLng(lat, lng) {
+      document.getElementById("latitude").value = lat;
+      document.getElementById("longitude").value = lng;
+    }
+
+    // Update lat/lng when marker moves
+    marker.on('dragend', function (e) {
+      const pos = e.target.getLatLng();
+      updateLatLng(pos.lat, pos.lng);
+    });
+
+    // Click on map to move marker
+    map.on('click', function (e) {
+      marker.setLatLng(e.latlng);
+      updateLatLng(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Set default lat/lng
+    updateLatLng(23.8103, 90.4125);
+
+    // Handle form submit
     document.getElementById("createRequestForm").addEventListener("submit", async function(e) {
-        e.preventDefault();
+      e.preventDefault();
 
-        const requestData = {
-            recipientId: localStorage.getItem('userId'), // Assuming recipientId is stored in localStorage as 'userId'
-            patientName: document.getElementById("patientName").value,
-            bloodType: document.getElementById("bloodGroup").value, // Changed to bloodType
-            location: { // Create location object
-                city: document.getElementById("city").value
-            },
-            hospital: document.getElementById("hospital").value,
-            requiredDate: document.getElementById("date").value + "T00:00:00"
-        };
+      const requestData = {
+        patientName: document.getElementById("patientName").value,
+        bloodGroup: document.getElementById("bloodGroup").value,
+        city: document.getElementById("city").value,
+        hospital: document.getElementById("hospital").value,
+        requiredDate: document.getElementById("date").value,
+        contact: document.getElementById("contact").value,
+        latitude: document.getElementById("latitude").value,
+        longitude: document.getElementById("longitude").value
+      };
 
-        try {
-            const response = await fetch("/api/requests", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestData)
-            });
+      try {
+        const response = await fetch("http://localhost:9090/recipients/requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestData)
+        });
 
-            const messageElement = document.getElementById("responseMessage");
-            if (response.ok) {
-                messageElement.style.color = "green";
-                messageElement.textContent = "Request submitted successfully!";
-                document.getElementById("createRequestForm").reset();
-            } else {
-                // Try to parse the error message from the server
-                const errorData = await response.json(); // Assuming server sends JSON error
-                messageElement.style.color = "red";
-                messageElement.textContent = errorData.message || "Failed to submit request.";
-            }
-        } catch (error) {
-            document.getElementById("responseMessage").style.color = "red";
-            document.getElementById("responseMessage").textContent = "Server error. Try again later.";
+        const messageElement = document.getElementById("responseMessage");
+        if (response.ok) {
+          messageElement.style.color = "green";
+          messageElement.textContent = "Request submitted successfully!";
+          document.getElementById("createRequestForm").reset();
+        } else {
+          messageElement.style.color = "red";
+          messageElement.textContent = "Failed to submit request.";
         }
+      } catch (error) {
+        document.getElementById("responseMessage").style.color = "red";
+        document.getElementById("responseMessage").textContent = "Server error. Try again later.";
+      }
     });
 </script>
 </body>
 </html>
-
