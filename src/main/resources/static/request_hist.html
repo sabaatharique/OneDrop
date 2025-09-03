@@ -77,7 +77,7 @@
                     <th>Request Date</th>
                     <th>Blood Type</th>
                     <th>Status</th>
-                    <th>Hospital</th>
+                    <th>Address</th>
                 </tr>
                 </thead>
                 <tbody id="historyBody">
@@ -200,7 +200,7 @@ function getStatusClass(status) {
                     <td>${Utils.formatDate(req.createdAt)}</td>
                     <td>${req.bloodType || '-'}</td>
                     <td><span class="status-btn ${getStatusClass(req.status)}">${Utils.formatStatus(req.status)}</span></td>
-                    <td>${req.location?.hospital || '-'}</td>
+                    <td>${req.location?.address || '-'}</td>
                 `;
                 historyBody.appendChild(tr);
             });

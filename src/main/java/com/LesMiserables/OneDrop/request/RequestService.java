@@ -38,6 +38,7 @@ public class RequestService {
         request.setStatus(Request.Status.PENDING);
         request.setCreatedAt(LocalDateTime.now());
         request.setRequiredBy(dto.getRequiredBy());
+        request.setRecipientPhone(recipient.getUser().getPhone());
         request.setMatchedDonor(null);
         Request saved = requestRepo.save(request);
         return mapToDto(saved);
@@ -196,7 +197,8 @@ public class RequestService {
                 request.getLocation(),
                 request.getStatus(),
                 request.getCreatedAt(),
-                request.getRequiredBy()
+                request.getRequiredBy(),
+                request.getRecipientPhone()
         );
     }
 

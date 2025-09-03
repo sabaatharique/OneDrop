@@ -33,6 +33,7 @@ public class Request {
     private String bloodType;
 
     @Embedded
+    @Column(nullable = false)
     private Location location;
 
     @Column(nullable = false)
@@ -44,6 +45,9 @@ public class Request {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private String recipientPhone;
 
     public enum Status {
         PENDING,

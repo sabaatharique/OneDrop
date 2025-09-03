@@ -16,4 +16,5 @@ public class DonorMatchDTO {
     private Location location;
     private LocalDateTime requiredBy;
     private double distanceKm;
+    private String recipientPhone;
 }

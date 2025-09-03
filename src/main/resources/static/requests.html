@@ -189,9 +189,11 @@
             if (data && data.length > 0) {
                 const lat = parseFloat(data[0].lat);
                 const lon = parseFloat(data[0].lon);
+                const displayName = data[0].display_name; // Get the full address
                 map.setView([lat, lon], 13); // Zoom in a bit after search
                 marker.setLatLng([lat, lon]);
                 updateLatLng(lat, lon);
+                document.getElementById("address").value = displayName; // Update the address input field
             } else {
                 alert("Location not found. Please try a different search term.");
             }
@@ -208,51 +210,55 @@
 document.getElementById("createRequestForm").addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  // Grab the date value
   const dateValue = document.getElementById("date").value; // e.g. "2025-09-04"
-
-  // Convert to LocalDateTime format for backend
   const requiredBy = dateValue ? dateValue + "T00:00:00" : null;
 
-  const requestData = {
-                recipientId: localStorage.getItem('recipientId'), // Use recipientId from localStorage
-      patientName: document.getElementById("patientName").value,
-      bloodType: document.getElementById("bloodGroup").value,
-      location: {
-          hospital: document.getElementById("address").value,
-          latitude: parseFloat(document.getElementById("latitude").value),
-          longitude: parseFloat(document.getElementById("longitude").value)
-      },
-      requiredBy: requiredBy
-    };
-
+  const recipientId = localStorage.getItem('recipientId');
   const token = localStorage.getItem('jwtToken');
-  const role = localStorage.getItem('userRole');
+  console.log('Recipient ID:', recipientId);
   console.log('JWT Token:', token);
-  console.log('User Role:', role);
+  if (!recipientId) {
+      alert("Recipient ID not found. Please log in again.");
+      return;
+  }
 
   try {
-    const response = await fetch("http://localhost:8000/api/requests", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem('jwtToken')}`
-      },
-      body: JSON.stringify(requestData)
-    });
+    const requestData = {
+    recipientId: recipientId,
+    patientName: document.getElementById("patientName").value,
+    bloodType: document.getElementById("bloodGroup").value,
+    location: {
+        address: document.getElementById("address").value,
+        latitude: parseFloat(document.getElementById("latitude").value),
+        longitude: parseFloat(document.getElementById("longitude").value)
+    },
+    requiredBy: requiredBy
+};
 
-    const messageElement = document.getElementById("responseMessage");
-    if (response.ok) {
-      messageElement.style.color = "green";
-      messageElement.textContent = "Request submitted successfully!";
-      document.getElementById("createRequestForm").reset();
-    } else {
-      messageElement.style.color = "red";
-      messageElement.textContent = "Failed to submit request.";
-    }
+      const response = await fetch("http://localhost:8000/api/requests", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem('jwtToken')}`
+          },
+          body: JSON.stringify(requestData)
+      });
+
+      const messageElement = document.getElementById("responseMessage");
+      if (response.ok) {
+          messageElement.style.color = "green";
+          messageElement.textContent = "Request submitted successfully!";
+          document.getElementById("createRequestForm").reset();
+      } else {
+          messageElement.style.color = "red";
+          messageElement.textContent = "Failed to submit request.";
+      }
+
   } catch (error) {
-    document.getElementById("responseMessage").style.color = "red";
-    document.getElementById("responseMessage").textContent = "Server error. Try again later.";
+      console.error("Error submitting request:", error);
+      const messageElement = document.getElementById("responseMessage");
+      messageElement.style.color = "red";
+      messageElement.textContent = "Server error. Try again later.";
   }
 });
 </script>
