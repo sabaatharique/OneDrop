@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="assets/js/dashboard.js"></script>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OneDrop | Recipient Dashboard</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <script>
+        // Logout functionality
+        function logout() {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userRole");
+            location.href = "index.html"; // redirect to home page
+        }
+    </script>
 </head>
 <body>
 <div class="dashboard-container">
@@ -15,16 +22,15 @@
         <nav>
             <a href="recipient_dash.html" class="active">Dashboard</a>
             <a href="requests.html">Create Request</a>
-            <a href="request_track.html">Request Update</a>
-                        <a href="request_hist.html">Request History</a>
-            <a href="#" id="switchProfileLink" style="display: none;">Switch to Donor</a>
+            <!--<a href="request_track.html">Request Update</a> -->
+            <a href="request_hist.html">Request History</a>
         </nav>
     </aside>
 
     <main class="main-content">
         <header class="topbar">
             <h1>Recipient Dashboard</h1>
-            <button class="logout-btn">Logout</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
 
         <!-- Stats cards relevant for recipients -->
@@ -56,37 +62,5 @@
         </section>
     </main>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const logoutButton = document.querySelector('.logout-btn');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', function() {
-                // Clear all relevant items from localStorage
-                localStorage.removeItem('jwtToken');
-                localStorage.removeItem('userRole');
-                localStorage.removeItem('userId');
-                localStorage.removeItem('recipientId');
-                localStorage.removeItem('donorId');
-                localStorage.removeItem('activeProfile'); // Clear active profile on logout
-                // Redirect to the index page
-                window.location.href = 'index.html';
-            });
-        }
-
-        const userRole = localStorage.getItem('userRole');
-        const switchProfileLink = document.getElementById('switchProfileLink');
-
-        if (userRole === 'BOTH') {
-            switchProfileLink.style.display = 'block';
-            switchProfileLink.textContent = 'Switch to Donor';
-            switchProfileLink.href = 'donor_dash.html';
-            switchProfileLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                localStorage.setItem('activeProfile', 'DONOR');
-                window.location.href = 'donor_dash.html';
-            });
-        }
-    });
-</script>
 </body>
 </html>

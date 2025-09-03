@@ -40,33 +40,6 @@
             font-size: 1rem;
             color: #333;
         }
-
-        /* Stats Section */
-        .stats {
-            text-align: center;
-            padding: 50px 20px;
-            background: #f9fafb;
-        }
-
-        .stats h2 {
-            margin-bottom: 30px;
-        }
-
-        .stat-item {
-            display: inline-block;
-            margin: 0 25px;
-        }
-
-        .stat-item h3 {
-            font-size: 2rem;
-            color: #dc2626;
-            margin-bottom: 5px;
-        }
-
-        .stat-item p {
-            font-size: 1rem;
-            color: #333;
-        }
     </style>
     <script src="assets/js/auth.js"></script>
 </head>
@@ -84,15 +57,8 @@
 <section class="hero">
     <h1>Connecting Blood Donors and Recipients</h1>
     <p>Find donors, manage requests, and save lives.</p>
-    <a href="user_profile.html" class="btn">Educational Hub</a>
+    <a href="educational_hub.html" class="btn">Educational Hub</a>
 </section>
-
-<!--<section class="hero">
-    <h1>Connecting Blood Donors and Recipients</h1>
-    <p>Find donors, manage requests, and save lives.</p>
-    <p class="get-started-text">Get Started</p>
-</section> -->
-
 
 <!-- Info Cards Section -->
 <section class="cards-container">
@@ -124,10 +90,9 @@
         } else if (userRole === "RECIPIENT") {
             dashboardUrl = "recipient_dash.html";
         }
-        // Logged-in view: Dashboard + Profile
+        // Logged-in view: only Dashboard + Logout
         nav.innerHTML += `
             <a href="${dashboardUrl}" class="btn">Dashboard</a>
-            <a href="user_profile.html" class="btn">Profile</a>
             <a href="#" class="btn" onclick="logout()">Logout</a>
         `;
     } else {

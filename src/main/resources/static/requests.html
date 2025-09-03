@@ -64,19 +64,33 @@
           font-weight: bold;
         }
 
-        .back-btn {
-          display: inline-block;
-          margin-top: 15px;
-          text-decoration: none;
-          color: #c62828;
-          font-weight: bold;
-        }
-
         #map {
           height: 300px;
           border-radius: 10px;
           margin-top: 10px;
         }
+
+         .back-btn {
+        display: inline-block;
+        margin-top: 15px;
+        text-decoration: none;
+        color: #c62828;
+        font-weight: bold;
+        padding: 10px 20px;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+        width : auto;
+        }
+
+        .back-btn:hover {
+            background: #b91c1c;
+        }
+
     </style>
 </head>
 <body>
@@ -86,15 +100,15 @@
         <nav>
             <a href="recipient_dash.html">Dashboard</a>
             <a href="requests.html" class="active">Create Request</a>
-            <a href="request_track.html">Request Update</a>
+            <!-- <a href="request_track.html">Request Update</a> -->
             <a href="request_hist.html">Request History</a>
         </nav>
     </aside>
 
     <main class="main-content">
-        <header class="topbar">
+        <header class="topbar" style="display: flex; justify-content: space-between; align-items: center;">
             <h1>Create Blood Request</h1>
-            <a href="recipient_dash.html" class="back-btn">← Back to Dashboard</a>
+            <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
         </header>
 
         <section class="form-container">
@@ -134,7 +148,7 @@
                     <input type="date" id="date" name="date" required>
                 </div>
 
-                
+
 
                 <!-- Hidden lat/lng fields -->
                 <input type="hidden" id="latitude" name="latitude">
