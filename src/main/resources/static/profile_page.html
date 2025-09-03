@@ -63,20 +63,12 @@
                         <p id="bloodType">Loading...</p>
                     </div>
                     <div>
-                        <h3>Last Donated</h3>
-                        <p id="lastDonation">Loading...</p>
+                        <h3>Email</h3>
+                        <p id="email">Loading...</p>
                     </div>
                     <div>
-                        <h3>Last Received Request</h3>
-                        <p id="lastRequest">Loading...</p>
-                    </div>
-                    <div>
-                        <h3>Total Donations</h3>
-                        <p id="totalDonations">Loading...</p>
-                    </div>
-                    <div>
-                        <h3>Total Received</h3>
-                        <p id="totalReceived">Loading...</p>
+                        <h3>Phone</h3>
+                        <p id="phone">Loading...</p>
                     </div>
                 </div>
             </div>
@@ -99,9 +91,8 @@
     } else if (role === "RECIPIENT") {
       sidebar.innerHTML = `
         <a href="profile_page.html" class="active">Dashboard</a>
-        <a href="donors.html">Donors</a>
-        <a href="recipients.html">Recipients</a>
-        <a href="requests.html">Requests</a>
+        <a href="requests.html">Create Request</a>
+        <a href="request_hist.html">Request History</a>
       `;
     }
 
@@ -112,29 +103,25 @@
         const recipientId = localStorage.getItem("recipientId");
 
         if (role === "DONOR" && donorId) {
-          const res = await axios.get(`/donors/${donorId}`, {
+                    const res = await axios.get(`/api/donors/${donorId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const donor = res.data;
-          document.getElementById("name").textContent = donor.user?.fullName || "N/A";
+          document.getElementById("name").textContent = donor.fullName || "N/A";
           document.getElementById("bloodType").textContent = donor.bloodType || "N/A";
-          document.getElementById("lastDonation").textContent = donor.lastDonationDate || "N/A";
-          document.getElementById("lastRequest").textContent = donor.lastRequestDate || "N/A";
-          document.getElementById("totalDonations").textContent = donor.totalDonations || "0";
-          document.getElementById("totalReceived").textContent = donor.totalReceived || "0";
+          document.getElementById("email").textContent = donor.email || "N/A";
+          document.getElementById("phone").textContent = donor.phone || "N/A";
         }
 
         if (role === "RECIPIENT" && recipientId) {
-          const res = await axios.get(`/recipients/${recipientId}`, {
+                    const res = await axios.get(`/api/recipients/${recipientId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const recipient = res.data;
-          document.getElementById("name").textContent = recipient.user?.fullName || "N/A";
+          document.getElementById("name").textContent = recipient.fullName || "N/A";
           document.getElementById("bloodType").textContent = recipient.bloodType || "N/A";
-          document.getElementById("lastDonation").textContent = recipient.lastDonationDate || "N/A";
-          document.getElementById("lastRequest").textContent = recipient.lastRequestDate || "N/A";
-          document.getElementById("totalDonations").textContent = recipient.totalDonations || "0";
-          document.getElementById("totalReceived").textContent = recipient.totalReceived || "0";
+          document.getElementById("email").textContent = recipient.email || "N/A";
+          document.getElementById("phone").textContent = recipient.phone || "N/A";
         }
       } catch (err) {
         console.error("Could not load profile:", err);
