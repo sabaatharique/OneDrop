@@ -191,6 +191,7 @@ public class RequestService {
                 request.getId(),
                 request.getRecipient().getId(),
                 request.getRecipient().getUser().getFullName(),
+                request.getPatientName(),
                 request.getMatchedDonor() != null ? request.getMatchedDonor().getId() : null,
                 request.getMatchedDonor() != null ? request.getMatchedDonor().getUser().getFullName() : null,
                 request.getBloodType(),

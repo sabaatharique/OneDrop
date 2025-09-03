@@ -13,6 +13,7 @@ public class RequestDTO {
     private Long id;
     private Long recipientId;
     private String recipientName;
+    private String patientName;
     private Long donorId;
     private String donorName;
     private String bloodType;

@@ -9,6 +9,7 @@
     
     <script src="assets/js/auth.js"></script>
     <style>
+
         .table-container {
             background: #fff;
             padding: 20px;
@@ -130,9 +131,9 @@ function getStatusClass(status) {
     switch(status.toUpperCase()) {
         case 'PENDING': return 'status-pending';
         case 'MATCHED': return 'status-matched';
-        case 'FULFILLED': return 'status-completed'; // map FULFILLED to completed style
+        case 'FULFILLED': return 'status-completed';
         case 'CANCELLED': return 'status-cancelled';
-        case 'EXPIRED': return 'status-rejected'; // map EXPIRED to rejected style
+        case 'EXPIRED': return 'status-rejected';
         default: return '';
     }
 }
