@@ -19,9 +19,6 @@ public class Recipient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String bloodType;
-
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +31,9 @@ public class RegisterRequest {
 
     @NotBlank(message = "Phone number required")
     private String phone;
+
+    @NotBlank(message = "Blood type required")
+    private String bloodType;
+
+    private LocalDate lastDonationDate;
 }

@@ -21,10 +21,8 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain security(HttpSecurity http) throws Exception {
         return http
-                // disable csrf (browser cookies)
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {
-                })
+                .cors(cors -> {})
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -43,8 +41,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/donations/**").hasAnyAuthority("ADMIN", "DONOR")
                         .requestMatchers("/api/matches/**").hasAnyAuthority("ADMIN", "DONOR", "RECIPIENT")
                         .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/assets/**", "/*.html").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(form -> form.disable())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 }

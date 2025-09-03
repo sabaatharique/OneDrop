@@ -8,6 +8,11 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+#nav-links {
+    display: flex;
+    align-items: center;
+}
+
 /* Navbar links spacing */
 .navbar nav a {
     margin-left: 15px;

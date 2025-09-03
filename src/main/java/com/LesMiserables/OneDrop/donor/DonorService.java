@@ -1,6 +1,5 @@
 package com.LesMiserables.OneDrop.donor;
 
-import com.LesMiserables.OneDrop.donor.dto.DonorLocationDTO;
 import com.LesMiserables.OneDrop.exceptions.DonorNotFoundException;
 import com.LesMiserables.OneDrop.user.User;
 import com.LesMiserables.OneDrop.user.UserRepository;
@@ -38,25 +37,7 @@ public class DonorService {
                 saved.getId(),
                 saved.getBloodType(),
                 saved.isEligibleToDonate(),
-                saved.getUser().getId(),
-                saved.getLocation()
-        );
-    }
-
-    // auto update current location
-    public DonorResponseDTO updateDonorLocation(Long donorId, DonorLocationDTO location) {
-        Donor donor = donorRepository.findById(donorId)
-                .orElseThrow(() -> new DonorNotFoundException("Donor not found"));
-
-        donor.setLocation(location.getLocation());
-        donorRepository.save(donor);
-
-        return new DonorResponseDTO(
-                donor.getId(),
-                donor.getBloodType(),
-                donor.isEligibleToDonate(),
-                donor.getUser().getId(),
-                donor.getLocation()
+                saved.getUser().getId()
         );
     }
 
@@ -68,8 +49,7 @@ public class DonorService {
                         d.getId(),
                         d.getBloodType(),
                         d.isEligibleToDonate(),
-                        d.getUser().getId(),
-                        d.getLocation()
+                        d.getUser().getId()
                 ))
                 .collect(Collectors.toList());
     }
@@ -83,8 +63,7 @@ public class DonorService {
                 donor.getId(),
                 donor.getBloodType(),
                 donor.isEligibleToDonate(),
-                donor.getUser().getId(),
-                donor.getLocation()
+                donor.getUser().getId()
         );
     }
 

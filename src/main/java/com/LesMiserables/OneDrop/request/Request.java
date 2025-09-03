@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "requests")
@@ -27,6 +28,9 @@ public class Request {
     private Donor matchedDonor;
 
     @Column(nullable = false)
+    private String patientName;
+
+    @Column(nullable = false)
     private String bloodType;
 
     @Embedded
@@ -40,6 +44,7 @@ public class Request {
     @Column(nullable = false)
     private Status status;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public enum Status {

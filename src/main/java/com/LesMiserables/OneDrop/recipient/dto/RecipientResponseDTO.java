@@ -7,6 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class RecipientResponseDTO {
     private Long id;
-    private String bloodType;
     private Long userId;
 }

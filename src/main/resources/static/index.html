@@ -68,6 +68,7 @@
             color: #333;
         }
     </style>
+    <script src="assets/js/auth.js"></script>
 </head>
 <body>
 <header class="navbar">
@@ -75,7 +76,8 @@
         <span class="one">One</span><span class="drop">Drop</span>
     </div>
     <nav id="nav-links">
-        <!-- Navbar links injected by JS -->
+        <a href="login.html" class="btn" id="loginBtn">Login</a>
+        <a href="register.html" class="btn" id="registerBtn">Register</a>
     </nav>
 </header>
 
@@ -123,13 +125,15 @@
     // Dynamic Navbar JS
     // -------------------------------
     const nav = document.getElementById('nav-links');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
     const token = localStorage.getItem('jwtToken');
     const userRole = localStorage.getItem('userRole');
 
-    // Clear current links
-    nav.innerHTML = '';
-
     if (token) {
+        loginBtn.style.display = 'none';
+        registerBtn.style.display = 'none';
+
         let dashboardUrl = "#";
         if (userRole === "DONOR") {
             dashboardUrl = "donor_dash.html";
@@ -137,16 +141,14 @@
             dashboardUrl = "recipient_dash.html";
         }
         // Logged-in view: Dashboard + Profile
-        nav.innerHTML = `
+        nav.innerHTML += `
             <a href="${dashboardUrl}" class="btn">Dashboard</a>
             <a href="user_profile.html" class="btn">Profile</a>
+            <a href="#" class="btn" onclick="logout()">Logout</a>
         `;
     } else {
-        // Guest view: Login + Register
-        nav.innerHTML = `
-            <a href="login.html">Login</a>
-            <a href="register.html">Register</a>
-        `;
+        loginBtn.style.display = 'block';
+        registerBtn.style.display = 'block';
     }
 </script>
 </body>

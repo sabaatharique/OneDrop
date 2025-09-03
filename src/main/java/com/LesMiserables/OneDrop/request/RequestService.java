@@ -6,8 +6,8 @@ import com.LesMiserables.OneDrop.exceptions.*;
 import com.LesMiserables.OneDrop.recipient.Recipient;
 import com.LesMiserables.OneDrop.recipient.RecipientRepository;
 import com.LesMiserables.OneDrop.request.dto.CreateRequestDTO;
-import com.LesMiserables.OneDrop.request.dto.RequestDTO;
 import com.LesMiserables.OneDrop.request.dto.UpdateRequestDTO;
+import com.LesMiserables.OneDrop.request.dto.RequestDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,6 @@ public class RequestService {
         request.setCreatedAt(LocalDateTime.now());
         request.setRequiredBy(dto.getRequiredBy());
         request.setMatchedDonor(null);
-
         Request saved = requestRepo.save(request);
         return mapToDto(saved);
     }

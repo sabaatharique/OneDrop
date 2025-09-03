@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MatchService {
@@ -22,14 +23,13 @@ public class MatchService {
     private final RequestRepository requestRepo;
     private final DonorRepository donorRepo;
     private final MatchRepository matchRepo;
-    private LocationUtil locUtil;
+    private final LocationUtil locUtil;
 
     // Donor views compatible requests nearby
-    public List<DonorMatchDTO> findMatchesForDonor(Long donorId, double radiusKm) {
+    public List<DonorMatchDTO> findMatchesForDonor(Long donorId, Location donorLocation, double radiusKm) {
         Donor donor = donorRepo.findById(donorId)
                 .orElseThrow(() -> new RuntimeException("Donor not found"));
 
-        Location donorLocation = donor.getLocation();
         if (donorLocation == null) throw new RuntimeException("Donor location not set");
 
         List<Request> pendingRequests = requestRepo.findByStatus(Request.Status.PENDING);
@@ -55,7 +55,7 @@ public class MatchService {
     }
 
     // Recipient views compatible donors nearby
-    public List<RequestMatchDTO> findMatchesForRequest(Long requestId, double radiusKm) {
+    public List<RequestMatchDTO> findMatchesForRequest(Long requestId, Location donorLocation, double radiusKm) {
         Request request = requestRepo.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
@@ -66,16 +66,16 @@ public class MatchService {
 
         return donors.stream()
                 .filter(donor -> isBloodCompatible(donor.getBloodType(), request.getBloodType()))
-                .filter(donor -> donor.getLocation() != null &&
-                        locUtil.distance(donor.getLocation(), requestLocation) <= radiusKm)
+                .filter(donor -> donor.isEligibleToDonate())
+                .filter(donor -> locUtil.distance(donorLocation, requestLocation) <= radiusKm)
                 .sorted(Comparator
-                        .comparing((Donor donor) -> locUtil.distance(donor.getLocation(), requestLocation)))
+                        .comparing((Donor donor) -> locUtil.distance(donorLocation, requestLocation)))
                 .map(donor -> new RequestMatchDTO(
                         donor.getId(),
                         donor.getUser().getFullName(),
                         donor.getBloodType(),
-                        donor.getLocation(),
-                        locUtil.distance(donor.getLocation(), requestLocation)
+                        donorLocation,
+                        locUtil.distance(donorLocation, requestLocation)
                 ))
                 .toList();
     }

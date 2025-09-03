@@ -1,5 +1,8 @@
 package com.LesMiserables.OneDrop.location;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class LocationUtil {
     private static final double EARTH_RADIUS_KM = 6371.0;
 

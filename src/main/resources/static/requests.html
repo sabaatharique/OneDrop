@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,7 +79,7 @@
         <h2>OneDrop</h2>
         <nav>
             <a href="recipient_dash.html">Dashboard</a>
-            <a href="create_request.html" class="active">Create Request</a>
+            <a href="requests.html" class="active">Create Request</a>
             <a href="request_track.html">Request Update</a>
             <a href="request_hist.html">Request History</a>
         </nav>
@@ -128,11 +129,6 @@
                     <input type="date" id="date" name="date" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="contact">Contact Number</label>
-                    <input type="text" id="contact" name="contact" placeholder="+8801XXXXXXXXX" required>
-                </div>
-
                 <button type="submit">Submit Request</button>
                 <div class="message" id="responseMessage"></div>
             </form>
@@ -145,16 +141,18 @@
         e.preventDefault();
 
         const requestData = {
+            recipientId: localStorage.getItem('userId'), // Assuming recipientId is stored in localStorage as 'userId'
             patientName: document.getElementById("patientName").value,
-            bloodGroup: document.getElementById("bloodGroup").value,
-            city: document.getElementById("city").value,
+            bloodType: document.getElementById("bloodGroup").value, // Changed to bloodType
+            location: { // Create location object
+                city: document.getElementById("city").value
+            },
             hospital: document.getElementById("hospital").value,
-            requiredDate: document.getElementById("date").value,
-            contact: document.getElementById("contact").value
+            requiredDate: document.getElementById("date").value + "T00:00:00"
         };
 
         try {
-            const response = await fetch("http://localhost:9090/recipients/requests", {
+            const response = await fetch("/api/requests", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(requestData)
@@ -166,8 +164,10 @@
                 messageElement.textContent = "Request submitted successfully!";
                 document.getElementById("createRequestForm").reset();
             } else {
+                // Try to parse the error message from the server
+                const errorData = await response.json(); // Assuming server sends JSON error
                 messageElement.style.color = "red";
-                messageElement.textContent = "Failed to submit request.";
+                messageElement.textContent = errorData.message || "Failed to submit request.";
             }
         } catch (error) {
             document.getElementById("responseMessage").style.color = "red";
@@ -177,3 +177,4 @@
 </script>
 </body>
 </html>
+

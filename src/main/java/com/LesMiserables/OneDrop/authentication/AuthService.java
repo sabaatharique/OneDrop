@@ -3,9 +3,13 @@ package com.LesMiserables.OneDrop.authentication;
 import com.LesMiserables.OneDrop.authentication.dto.AuthRequest;
 import com.LesMiserables.OneDrop.authentication.dto.AuthResponse;
 import com.LesMiserables.OneDrop.authentication.dto.RegisterRequest;
+import com.LesMiserables.OneDrop.donor.Donor;
+import com.LesMiserables.OneDrop.donor.DonorRepository;
 import com.LesMiserables.OneDrop.exceptions.InvalidCredentialsException;
 import com.LesMiserables.OneDrop.exceptions.UnauthorisedAdminActionException;
 import com.LesMiserables.OneDrop.exceptions.UserNotFoundException;
+import com.LesMiserables.OneDrop.recipient.Recipient;
+import com.LesMiserables.OneDrop.recipient.RecipientRepository;
 import com.LesMiserables.OneDrop.user.User;
 import com.LesMiserables.OneDrop.user.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -16,15 +20,19 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository repo;
     private final JWTUtil jwtUtil;
+    private final DonorRepository donorRepository;
+    private final RecipientRepository recipientRepository;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    public AuthService(UserRepository repo, JWTUtil jwtUtil) {
+    public AuthService(UserRepository repo, JWTUtil jwtUtil, DonorRepository donorRepository, RecipientRepository recipientRepository) {
         this.repo = repo;
         this.jwtUtil = jwtUtil;
+        this.donorRepository = donorRepository;
+        this.recipientRepository = recipientRepository;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -41,6 +49,18 @@ public class AuthService {
                 .build();
 
         repo.save(user);
+
+        if (request.getRole() == User.Role.DONOR) {
+            Donor donor = new Donor();
+            donor.setUser(user);
+            donor.setBloodType(request.getBloodType());
+            donor.setLastDonationDate(request.getLastDonationDate());
+            donorRepository.save(donor);
+        } else if (request.getRole() == User.Role.RECIPIENT) {
+            Recipient recipient = new Recipient();
+            recipient.setUser(user);
+            recipientRepository.save(recipient);
+        }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token);

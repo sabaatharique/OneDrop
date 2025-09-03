@@ -1,5 +1,6 @@
 package com.LesMiserables.OneDrop.match;
 
+import com.LesMiserables.OneDrop.location.Location;
 import com.LesMiserables.OneDrop.match.dto.DonorMatchDTO;
 import com.LesMiserables.OneDrop.match.dto.RequestMatchDTO;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,12 @@ public class MatchController {
     @GetMapping("/donor/{donorId}")
     public ResponseEntity<List<DonorMatchDTO>> getMatchesForDonor(
             @PathVariable Long donorId,
+            @RequestParam double latitude,
+            @RequestParam double longitude,
             @RequestParam(defaultValue = "50") double radiusKm
     ) {
-        List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId, radiusKm);
+        Location donorLocation = new Location(latitude, longitude);
+        List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId, donorLocation, radiusKm);
         return ResponseEntity.ok(matches);
     }
 
@@ -34,9 +38,12 @@ public class MatchController {
     @GetMapping("/request/{requestId}")
     public ResponseEntity<List<RequestMatchDTO>> getMatchesForRequest(
             @PathVariable Long requestId,
+            @RequestParam double latitude,
+            @RequestParam double longitude,
             @RequestParam(defaultValue = "50") double radiusKm
     ) {
-        List<RequestMatchDTO> matches = matchService.findMatchesForRequest(requestId, radiusKm);
+        Location donorLocation = new Location(latitude, longitude);
+        List<RequestMatchDTO> matches = matchService.findMatchesForRequest(requestId, donorLocation, radiusKm);
         return ResponseEntity.ok(matches);
     }
 }

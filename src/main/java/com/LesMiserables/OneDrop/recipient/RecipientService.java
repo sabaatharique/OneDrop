@@ -26,7 +26,6 @@ public class RecipientService {
                 .orElseThrow(() -> new RecipientNotFoundException("Recipient not found with id: " + request.getUserId()));
 
         Recipient recipient = Recipient.builder()
-                .bloodType(request.getBloodType())
                 .user(user)
                 .build();
 
@@ -34,7 +33,6 @@ public class RecipientService {
 
         return new RecipientResponseDTO(
                 saved.getId(),
-                saved.getBloodType(),
                 saved.getUser().getId()
         );
     }
@@ -45,7 +43,6 @@ public class RecipientService {
                 .stream()
                 .map(d -> new RecipientResponseDTO(
                         d.getId(),
-                        d.getBloodType(),
                         d.getUser().getId()
                 ))
                 .collect(Collectors.toList());
@@ -58,7 +55,6 @@ public class RecipientService {
 
         return new RecipientResponseDTO(
                 recipient.getId(),
-                recipient.getBloodType(),
                 recipient.getUser().getId()
         );
     }

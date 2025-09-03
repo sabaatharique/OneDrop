@@ -20,6 +20,25 @@
             <option value="DONOR">Donor</option>
             <option value="RECIPIENT">Recipient</option>
         </select>
+        <div id="roleSpecificFields" style="display: none;">
+            <div id="donorFields" style="display: none;">
+                <select id="bloodType">
+                    <option value="" disabled selected>Select Blood Type</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+                <div>
+                    <label for="lastDonationDate">Last Donation Date:</label>
+                    <input type="date" id="lastDonationDate" />
+                </div>
+            </div>
+        </div>
         <button type="submit">Register</button>
         <p>Already have an account? <a href="login.html">Login</a></p>
 

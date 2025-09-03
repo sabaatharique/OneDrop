@@ -29,9 +29,6 @@ public class Donor {
         return lastDonationDate == null || lastDonationDate.isBefore(LocalDate.now().minusDays(90));
     }
 
-    @Transient
-    private Location location;
-
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
