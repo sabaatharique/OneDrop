@@ -32,20 +32,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Redirect based on role
-                    if (response.data.role === 'DONOR') {
-                        localStorage.setItem('userRole', 'DONOR'); // Ensure userRole is set to DONOR
+                    const userRole = response.data.role || role;
+
+                    if (userRole === 'DONOR') {
+                        localStorage.setItem('userRole', 'DONOR');
                         window.location.href = 'donor_dash.html';
-                    } else if (response.data.role === 'RECIPIENT') {
-                        localStorage.setItem('userRole', 'RECIPIENT'); // Ensure userRole is set to RECIPIENT
+                    } else if (userRole === 'RECIPIENT') {
+                        localStorage.setItem('userRole', 'RECIPIENT');
                         window.location.href = 'recipient_dash.html';
-                    } else if (response.data.role === 'BOTH') {
-                        // For 'BOTH' role, default to DONOR dashboard and set activeProfile
-                        localStorage.setItem('userRole', 'BOTH'); // Keep the actual role as BOTH
-                        localStorage.setItem('activeProfile', 'DONOR'); // Set default active profile
+                    } else if (userRole === 'BOTH') {
+                        localStorage.setItem('userRole', 'BOTH');
+                        localStorage.setItem('activeProfile', 'DONOR');
                         window.location.href = 'donor_dash.html';
                     } else {
-                        // Fallback or error for unexpected roles
-                        window.location.href = 'dashboard.html';
+                        window.location.href = 'index.html';
                     }
                 } else {
                     messageDiv.textContent = 'Login failed: No token received.';
