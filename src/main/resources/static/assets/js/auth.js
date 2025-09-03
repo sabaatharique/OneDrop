@@ -32,10 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Redirect based on role
-                    if (role === 'DONOR') {
+                    if (response.data.role === 'DONOR') {
+                        localStorage.setItem('userRole', 'DONOR'); // Ensure userRole is set to DONOR
                         window.location.href = 'donor_dash.html';
-                    } else if (role === 'RECIPIENT') {
+                    } else if (response.data.role === 'RECIPIENT') {
+                        localStorage.setItem('userRole', 'RECIPIENT'); // Ensure userRole is set to RECIPIENT
                         window.location.href = 'recipient_dash.html';
+                    } else if (response.data.role === 'BOTH') {
+                        // For 'BOTH' role, default to DONOR dashboard and set activeProfile
+                        localStorage.setItem('userRole', 'BOTH'); // Keep the actual role as BOTH
+                        localStorage.setItem('activeProfile', 'DONOR'); // Set default active profile
+                        window.location.href = 'donor_dash.html';
                     } else {
                         // Fallback or error for unexpected roles
                         window.location.href = 'dashboard.html';

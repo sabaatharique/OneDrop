@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
     private final UserRepository repo;
@@ -40,37 +42,77 @@ public class AuthService {
             throw new UnauthorisedAdminActionException("Cannot register as ADMIN");
         }
 
-        var user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder().encode(request.getPassword()))
-                .role(request.getRole())
-                .fullName(request.getFullName())
-                .phone(request.getPhone())
-                .build();
+        // Check if user already exists
+        Optional<User> existingUserOpt = repo.findByEmail(request.getEmail());
 
-        repo.save(user);
-
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        Long userId = user.getId();
-        Long recipientId = null;
+        User user;
         Long donorId = null;
+        Long recipientId = null;
 
-        if (request.getRole() == User.Role.DONOR) {
-            Donor donor = new Donor();
-            donor.setUser(user);
-            donor.setBloodType(request.getBloodType());
-            donor.setLastDonationDate(request.getLastDonationDate());
-            donorRepository.save(donor);
-            donorId = donor.getId(); // Get donorId after saving
-        } else if (request.getRole() == User.Role.RECIPIENT) {
-            Recipient recipient = new Recipient();
-            recipient.setUser(user);
-            recipientRepository.save(recipient);
-            recipientId = recipient.getId(); // Get recipientId after saving
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+
+            // Upgrade role if necessary
+            if (user.getRole() != User.Role.BOTH && user.getRole() != request.getRole()) {
+                user.setRole(User.Role.BOTH);
+                repo.save(user);
+            }
+
+            // Add donor record if needed
+            if (request.getRole() == User.Role.DONOR && donorRepository.findByUserId(user.getId()).isEmpty()) {
+                Donor donor = new Donor();
+                donor.setUser(user);
+                donor.setBloodType(request.getBloodType());
+                donor.setLastDonationDate(request.getLastDonationDate());
+                donorRepository.save(donor);
+                donorId = donor.getId();
+            }
+            // Add recipient record if needed
+            else if (request.getRole() == User.Role.RECIPIENT && recipientRepository.findByUserId(user.getId()).isEmpty()) {
+                Recipient recipient = new Recipient();
+                recipient.setUser(user);
+                recipientRepository.save(recipient);
+                recipientId = recipient.getId();
+            } else {
+                // Get existing donor/recipient IDs
+                donorId = donorRepository.findByUserId(user.getId()).map(Donor::getId).orElse(null);
+                recipientId = recipientRepository.findByUserId(user.getId()).map(Recipient::getId).orElse(null);
+            }
+
+        } else {
+            // Create new user
+            user = User.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder().encode(request.getPassword()))
+                    .role(request.getRole())
+                    .fullName(request.getFullName())
+                    .phone(request.getPhone())
+                    .build();
+            repo.save(user);
+
+            // Create role-specific record
+            if (request.getRole() == User.Role.DONOR) {
+                Donor donor = new Donor();
+                donor.setUser(user);
+                donor.setBloodType(request.getBloodType());
+                donor.setLastDonationDate(request.getLastDonationDate());
+                donorRepository.save(donor);
+                donorId = donor.getId();
+            } else if (request.getRole() == User.Role.RECIPIENT) {
+                Recipient recipient = new Recipient();
+                recipient.setUser(user);
+                recipientRepository.save(recipient);
+                recipientId = recipient.getId();
+            }
         }
 
-        return new AuthResponse(token, userId, recipientId, donorId);
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+
+        return new AuthResponse(token, user.getId(), recipientId, donorId);
     }
+
+
 
     public AuthResponse login(AuthRequest request) {
         User user = repo.findByEmail(request.getEmail())

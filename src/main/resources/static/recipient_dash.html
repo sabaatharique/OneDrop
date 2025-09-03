@@ -16,7 +16,8 @@
             <a href="recipient_dash.html" class="active">Dashboard</a>
             <a href="requests.html">Create Request</a>
             <a href="request_track.html">Request Update</a>
-            <a href="request_hist.html">Request History</a>
+                        <a href="request_hist.html">Request History</a>
+            <a href="#" id="switchProfileLink" style="display: none;">Switch to Donor</a>
         </nav>
     </aside>
 
@@ -55,5 +56,37 @@
         </section>
     </main>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutButton = document.querySelector('.logout-btn');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+                // Clear all relevant items from localStorage
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('recipientId');
+                localStorage.removeItem('donorId');
+                localStorage.removeItem('activeProfile'); // Clear active profile on logout
+                // Redirect to the index page
+                window.location.href = 'index.html';
+            });
+        }
+
+        const userRole = localStorage.getItem('userRole');
+        const switchProfileLink = document.getElementById('switchProfileLink');
+
+        if (userRole === 'BOTH') {
+            switchProfileLink.style.display = 'block';
+            switchProfileLink.textContent = 'Switch to Donor';
+            switchProfileLink.href = 'donor_dash.html';
+            switchProfileLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                localStorage.setItem('activeProfile', 'DONOR');
+                window.location.href = 'donor_dash.html';
+            });
+        }
+    });
+</script>
 </body>
 </html>

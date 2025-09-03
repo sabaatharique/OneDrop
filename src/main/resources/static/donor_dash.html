@@ -144,6 +144,7 @@
             <a href="track_donations.html">Track Donations</a>
             <a href="donation_calendar.html">Donation Calendar</a>
             <a href="matches.html">Matches</a>
+            <a href="#" id="switchProfileLink" style="display: none;">Switch to Recipient</a>
         </nav>
     </aside>
 
@@ -152,6 +153,7 @@
         <header class="topbar">
             <h1>Donor Dashboard</h1>
             <a href="profile_page.html" style="font-weight: bold; color: #000000; text-decoration: none;">Profile</a>
+            <button class="logout-btn">Logout</button>
         </header>
 
         <!-- Stats cards -->
@@ -192,7 +194,7 @@
 
 <script>
     const donorId = 1; // TODO: Replace with logged-in donor ID
-    const apiBase = "http://localhost:8080";
+    const apiBase = "http://localhost:8000";
 
     const requestList = document.getElementById("request-list");
     const upcomingAppointment = document.getElementById("upcoming-appointment");
@@ -207,31 +209,6 @@
     const pastBtn = document.getElementById("show-past-btn");
     const pastSection = document.getElementById("past-donations-section");
     const pastList = document.getElementById("past-donations-list");
-
-    // Fetch donor's appointment
-    async function fetchAppointment() {
-      const res = await fetch(`${apiBase}/donations/donor/${donorId}`);
-      if (res.status === 204) {
-        // No active appointment
-        upcomingAppointment.classList.add("hidden");
-        fetchRequests();
-      } else {
-        const data = await res.json();
-        showAppointment(data);
-      }
-    }
-
-    // Show upcoming appointment
-    function showAppointment(data) {
-      upcomingAppointment.classList.remove("hidden");
-      hospitalEl.textContent = data.hospital;
-      dateEl.textContent = data.appointmentDate;
-      statusEl.textContent = data.status;
-      recipientNameEl.textContent = data.recipientName;
-      recipientBloodEl.textContent = data.recipientBloodType;
-      recipientLocationEl.textContent = data.recipientLocation;
-      requestList.innerHTML = ""; // Hide other requests
-    }
 
     // Fetch all available requests
     async function fetchRequests() {
@@ -256,38 +233,6 @@
         `;
         requestList.appendChild(card);
       });
-    }
-
-    // Book an appointment
-    async function bookAppointment(recipientId) {
-      const res = await fetch(`${apiBase}/donations/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          donorId,
-          recipientId,
-          hospital: "Unknown",
-          appointmentDate: new Date().toISOString().split("T")[0]
-        }),
-      });
-
-      if (res.ok) {
-        alert("Appointment booked successfully!");
-        fetchAppointment();
-      } else {
-        const error = await res.text();
-        alert(error);
-      }
-    }
-
-    // Cancel appointment
-    cancelBtn.addEventListener("click", async () => {
-      const res = await fetch(`${apiBase}/donations/cancel/${donorId}`, { method: "DELETE" });
-      if (res.ok) {
-        alert("Appointment cancelled!");
-        fetchAppointment();
-      }
-    });
 
     // Toggle past donations
     pastBtn.addEventListener("click", async () => {
@@ -307,8 +252,36 @@
       }
     });
 
-    // Load initial data
-    fetchAppointment();
+
+    const logoutButton = document.querySelector('.logout-btn');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+                // Clear all relevant items from localStorage
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('recipientId');
+                localStorage.removeItem('donorId');
+                localStorage.removeItem('activeProfile'); // Clear active profile on logout
+                // Redirect to the index page
+                window.location.href = 'index.html';
+            });
+        }
+
+        const userRole = localStorage.getItem('userRole');
+        const switchProfileLink = document.getElementById('switchProfileLink');
+
+        if (userRole === 'BOTH') {
+            switchProfileLink.style.display = 'block';
+            switchProfileLink.textContent = 'Switch to Recipient';
+            switchProfileLink.href = 'recipient_dash.html';
+            switchProfileLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                localStorage.setItem('activeProfile', 'RECIPIENT');
+                window.location.href = 'recipient_dash.html';
+            });
+        }
+    });
 </script>
 </body>
 </html>

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class DonorMatchDTO {
     private Long requestId;
     private String recipientName;
+    private String patientName;
     private String bloodType;
     private Location location;
     private LocalDateTime requiredBy;
