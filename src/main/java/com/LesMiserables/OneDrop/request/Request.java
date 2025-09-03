@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "requests")
@@ -34,7 +33,6 @@ public class Request {
     private String bloodType;
 
     @Embedded
-    @Column(nullable = false)
     private Location location;
 
     @Column(nullable = false)

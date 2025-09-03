@@ -50,20 +50,26 @@ public class AuthService {
 
         repo.save(user);
 
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        Long userId = user.getId();
+        Long recipientId = null;
+        Long donorId = null;
+
         if (request.getRole() == User.Role.DONOR) {
             Donor donor = new Donor();
             donor.setUser(user);
             donor.setBloodType(request.getBloodType());
             donor.setLastDonationDate(request.getLastDonationDate());
             donorRepository.save(donor);
+            donorId = donor.getId(); // Get donorId after saving
         } else if (request.getRole() == User.Role.RECIPIENT) {
             Recipient recipient = new Recipient();
             recipient.setUser(user);
             recipientRepository.save(recipient);
+            recipientId = recipient.getId(); // Get recipientId after saving
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        return new AuthResponse(token);
+        return new AuthResponse(token, userId, recipientId, donorId);
     }
 
     public AuthResponse login(AuthRequest request) {
@@ -90,6 +96,20 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), request.getRole().name());
-        return new AuthResponse(token);
+        Long userId = user.getId();
+        Long recipientId = null;
+        Long donorId = null;
+
+        if (user.getRole() == User.Role.RECIPIENT || user.getRole() == User.Role.BOTH) {
+            recipientId = recipientRepository.findByUserId(userId)
+                    .map(Recipient::getId)
+                    .orElse(null);
+        }
+        if (user.getRole() == User.Role.DONOR || user.getRole() == User.Role.BOTH) {
+            donorId = donorRepository.findByUserId(userId)
+                    .map(Donor::getId)
+                    .orElse(null);
+        }
+        return new AuthResponse(token, userId, recipientId, donorId);
     }
 }

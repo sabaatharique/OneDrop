@@ -32,6 +32,7 @@ public class RequestService {
 
         Request request = new Request();
         request.setRecipient(recipient);
+        request.setPatientName(dto.getPatientName());
         request.setBloodType(dto.getBloodType());
         request.setLocation(dto.getLocation());
         request.setStatus(Request.Status.PENDING);

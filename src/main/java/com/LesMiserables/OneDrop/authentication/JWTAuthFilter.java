@@ -28,7 +28,7 @@ public class JWTAuthFilter extends GenericFilter {
                 var auth = new UsernamePasswordAuthenticationToken(
                         claims.getSubject(),
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + claims.get("role")))
+                        List.of(new SimpleGrantedAuthority(claims.get("role").toString()))
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception e) {

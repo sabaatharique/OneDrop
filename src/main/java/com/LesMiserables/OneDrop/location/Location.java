@@ -13,9 +13,4 @@ public class Location {
     private Double latitude;
     private Double longitude;
     private String address;
-
-    public Location(double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
 }

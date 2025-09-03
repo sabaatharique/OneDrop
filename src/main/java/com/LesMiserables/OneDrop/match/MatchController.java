@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -25,11 +24,12 @@ public class MatchController {
     @GetMapping("/donor/{donorId}")
     public ResponseEntity<List<DonorMatchDTO>> getMatchesForDonor(
             @PathVariable Long donorId,
+            @RequestParam String address,
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam(defaultValue = "50") double radiusKm
     ) {
-        Location donorLocation = new Location(latitude, longitude);
+        Location donorLocation = new Location(latitude, longitude, address);
         List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId, donorLocation, radiusKm);
         return ResponseEntity.ok(matches);
     }
@@ -40,9 +40,10 @@ public class MatchController {
             @PathVariable Long requestId,
             @RequestParam double latitude,
             @RequestParam double longitude,
+            @RequestParam String address,
             @RequestParam(defaultValue = "50") double radiusKm
     ) {
-        Location donorLocation = new Location(latitude, longitude);
+        Location donorLocation = new Location(latitude, longitude, address);
         List<RequestMatchDTO> matches = matchService.findMatchesForRequest(requestId, donorLocation, radiusKm);
         return ResponseEntity.ok(matches);
     }
