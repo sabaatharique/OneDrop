@@ -27,6 +27,25 @@
         .calendar .header { font-weight: bold; background: #f3f4f6; }
         .calendar .donation { background: #16a34a; color: #fff; font-weight: bold; }
         .next-eligibility { background: #fef3c7; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; }
+
+        /* Back to home button top-right */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 1000;
+        }
+        .back-btn:hover {
+            background: #b91c1c;
+        }
     </style>
 </head>
 <body>
@@ -34,7 +53,7 @@
     <aside class="sidebar">
         <h2>OneDrop</h2>
         <nav>
-            <a href="donor_dash.html" class="active">Dashboard</a>
+            <a href="profile_page.html" class="active">Dashboard</a>
             <a href="request_page.html">Find Requests</a>
             <a href="track_donations.html">Track Donations</a>
             <a href="donation_calendar.html">Donation Calendar</a>
@@ -44,7 +63,7 @@
     <main class="main-content">
         <header class="topbar">
             <h1>Donation Calendar</h1>
-            <a href="profile_page.html">Profile</a>
+            <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
         </header>
 
         <div class="next-eligibility" id="eligibility">

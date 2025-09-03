@@ -36,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (userRole === 'DONOR') {
                         localStorage.setItem('userRole', 'DONOR');
-                        window.location.href = 'donor_dash.html';
+                        window.location.href = 'profile_page.html';
                     } else if (userRole === 'RECIPIENT') {
                         localStorage.setItem('userRole', 'RECIPIENT');
-                        window.location.href = 'recipient_dash.html';
+                        window.location.href = 'profile_page.html';
                     } else if (userRole === 'BOTH') {
                         localStorage.setItem('userRole', 'BOTH');
                         localStorage.setItem('activeProfile', 'DONOR');
