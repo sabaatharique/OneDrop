@@ -72,6 +72,25 @@
             border-radius: 6px;
             border: 1px solid #ddd;
         }
+
+        /* Back to home button top-right */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 1000;
+        }
+        .back-btn:hover {
+            background: #b91c1c;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +108,7 @@
     <main class="main-content">
         <header class="topbar">
             <h1>Track Your Donations</h1>
-            <a href="profile_page.html" style="font-weight: bold; color: #000; text-decoration: none;">Profile</a>
+            <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
         </header>
 
         <section class="tables">
