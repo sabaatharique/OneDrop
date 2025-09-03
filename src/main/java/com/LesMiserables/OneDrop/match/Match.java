@@ -17,6 +17,9 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String patientName;
+
     @ManyToOne
     @JoinColumn(name = "request_id", nullable = false)
     private Request request;

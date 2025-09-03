@@ -47,9 +47,12 @@ public class RequestController {
     }
 
     @PutMapping("/{requestId}/accept")
-    public ResponseEntity<RequestDTO> acceptRequest(@PathVariable Long requestId, @RequestParam Long donorID) {
-        matchService.acceptRequest(donorID, requestId);
-        return ResponseEntity.ok(requestService.mapToDto(requestService.getRequestById(requestId)));
+    public ResponseEntity<RequestDTO> acceptRequest(
+            @PathVariable Long requestId,
+            @RequestParam Long donorId
+    ) {
+        RequestDTO updated = requestService.acceptRequest(requestId, donorId);
+        return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/{requestId}/complete")

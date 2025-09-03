@@ -82,7 +82,7 @@
     <aside class="sidebar">
         <h2>OneDrop</h2>
         <nav>
-            <a href="donor_dash.html">Dashboard</a>
+            <a href="profile_page.html">Dashboard</a>
             <a href="request_page.html" class="active">Find Requests</a>
             <a href="track_donations.html">Track Donations</a>
             <a href="donation_calendar.html">Donation Calendar</a>
@@ -296,10 +296,11 @@
              const headers = { 'Content-Type': 'application/json' };
              if (token) headers['Authorization'] = `Bearer ${token}`;
 
-             const res = await fetch(`/api/requests/${requestId}/accept?donorID=${donorId}`, {
-                 method: 'PUT',
-                 headers
-             });
+             const res = await fetch(`/api/requests/${requestId}/accept?donorId=${donorId}`, {
+                method: 'PUT',
+                headers
+            });
+
 
              if (res.ok) {
                  alert('Request accepted successfully!');
@@ -318,9 +319,10 @@
      // Initial load
      loadRequests(document.getElementById('bloodGroup').value.toUpperCase());
 
-     // Expose filters globally if you need
+     // Expose functions globally
      window.filterRequests = filterRequests;
      window.resetFilters = resetFilters;
+     window.acceptRequest = acceptRequest; // Add this line
  });
 </script>
 </body>
