@@ -27,10 +27,11 @@ public class MatchController {
             @RequestParam String address,
             @RequestParam double latitude,
             @RequestParam double longitude,
-            @RequestParam(defaultValue = "50") double radiusKm
+            @RequestParam(defaultValue = "50") double radiusKm,
+            @RequestParam(required = false) String bloodGroup
     ) {
         Location donorLocation = new Location(latitude, longitude, address);
-        List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId, donorLocation, radiusKm);
+        List<DonorMatchDTO> matches = matchService.findMatchesForDonor(donorId, donorLocation, radiusKm, bloodGroup);
         return ResponseEntity.ok(matches);
     }
 

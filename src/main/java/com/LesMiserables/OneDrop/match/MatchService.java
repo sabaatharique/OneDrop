@@ -26,7 +26,7 @@ public class MatchService {
     private final LocationUtil locUtil;
 
     // Donor views compatible requests nearby
-    public List<DonorMatchDTO> findMatchesForDonor(Long donorId, Location donorLocation, double radiusKm) {
+    public List<DonorMatchDTO> findMatchesForDonor(Long donorId, Location donorLocation, double radiusKm, String bloodGroup) {
         Donor donor = donorRepo.findById(donorId)
                 .orElseThrow(() -> new RuntimeException("Donor not found"));
 
@@ -37,6 +37,8 @@ public class MatchService {
         return pendingRequests.stream()
                 // filter by blood compatibility
                 .filter(req -> isBloodCompatible(donor.getBloodType(), req.getBloodType()))
+                // filter by bloodGroup if provided
+                .filter(req -> bloodGroup == null || bloodGroup.isEmpty() || req.getBloodType().equalsIgnoreCase(bloodGroup))
                 // filter by distance within radius
                 .filter(req -> locUtil.distance(donorLocation, req.getLocation()) <= radiusKm)
                 // sort by distance first, then urgency
@@ -50,8 +52,10 @@ public class MatchService {
                         req.getBloodType(),
                         req.getLocation(),
                         req.getRequiredBy(),
-                        locUtil.distance(donorLocation, req.getLocation())
+                        locUtil.distance(donorLocation, req.getLocation()),
+                        req.getRecipientPhone()
                 ))
+                .distinct()
                 .toList();
     }
 
@@ -78,6 +82,7 @@ public class MatchService {
                         donorLocation,
                         locUtil.distance(donorLocation, requestLocation)
                 ))
+                .distinct()
                 .toList();
     }
 
@@ -127,3 +132,4 @@ public class MatchService {
         };
     }
 }
+

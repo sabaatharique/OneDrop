@@ -20,4 +20,5 @@ public class RequestDTO {
     private Request.Status status;
     private LocalDateTime createdAt;
     private LocalDateTime requiredBy;
+    private String recipientPhone;
 }
