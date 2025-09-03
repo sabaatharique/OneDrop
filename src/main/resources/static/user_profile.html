@@ -3,62 +3,226 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OneDrop | Choose Profile</title>
+    <title>OneDrop | Educational Hub</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <style>
         body {
+          font-family: Arial, sans-serif;
+          background: #fee2e2;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Navbar like homepage */
+        .navbar {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            min-height: 100vh;
-            background: #fee2e2;
-            font-family: Arial, sans-serif;
+            padding: 20px 40px;
+            background: transparent; /* no white box */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
         }
-        .profile-container {
-            background: #fff;
-            padding: 40px 50px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .profile-container h2 {
-            margin-bottom: 30px;
+
+        .logo {
             font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .logo .one {
+            color: #000;
+        }
+        .logo .drop {
             color: #dc2626;
         }
-        .profile-btn {
-            display: block;
-            width: 200px;
-            margin: 15px auto;
-            padding: 12px 0;
+
+        /* Back button */
+        .back-btn {
+            padding: 10px 20px;
             background: #dc2626;
             color: white;
-            font-size: 1.1rem;
             border: none;
             border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
             transition: background 0.3s;
         }
-        .profile-btn:hover {
+
+        .back-btn:hover {
             background: #b91c1c;
         }
-        .logout-btn {
-            background: #ccc;
-            color: #333;
+
+        .edu-container {
+          max-width: 900px;
+          margin: 120px auto 40px auto;
+          padding: 0 20px;
         }
-        .logout-btn:hover {
-            background: #999;
+
+        .edu-title {
+          text-align: center;
+          font-size: 2rem;
+          color: #dc2626;
+          margin-bottom: 40px;
+        }
+
+        .edu-section {
+          background: #fff;
+          padding: 25px 30px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          margin-bottom: 25px;
+        }
+
+        .edu-section h3 {
+          color: #b91c1c;
+          margin-bottom: 15px;
+        }
+
+        .edu-section p, .edu-section ul {
+          color: #333;
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+
+        .flex-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .flex-section .text {
+          flex: 1;
+        }
+
+        .flex-section .image img {
+          width: 200px;
+          height: auto;
+          border-radius: 10px;
+        }
+
+        /* Responsive for smaller screens */
+        @media (max-width: 768px) {
+          .flex-section {
+            flex-direction: column;
+            text-align: center;
+          }
+          .flex-section .image img {
+            margin-top: 15px;
+            width: 100%;
+            max-width: 300px;
+          }
         }
     </style>
 </head>
 <body>
-<div class="profile-container">
-    <h2>Choose Your Profile</h2>
-    <button class="profile-btn" onclick="location.href='donor_dash.html'">Donor</button>
-    <button class="profile-btn" onclick="location.href='recipient_dash.html'">Recipient</button>
-    <button class="profile-btn logout-btn" onclick="logout()">Logout</button>
-</div>
 
-<script src="assets/js/logout.js"></script>
+<!-- Navbar -->
+<header class="navbar">
+    <div class="logo">
+        <span class="one">One</span><span class="drop">Drop</span>
+    </div>
+    <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
+</header>
+
+<div class="edu-container">
+    <h1 class="edu-title">Learn About Blood Donation</h1>
+
+    <!-- Why Blood Donation Matters -->
+    <div class="edu-section flex-section">
+        <div class="text">
+            <h3>Why Blood Donation Matters</h3>
+            <p>
+                Every 2 seconds, someone in the world needs blood.<br>
+                Blood cannot be manufactured, it can only come from<br>
+                generous donors.<br>
+                One donation can save up to 3 lives.
+            </p>
+        </div>
+        <div class="image">
+            <img src="assets/images/blood2.png" alt="Blood Donation" />
+        </div>
+    </div>
+
+    <!-- Who Can and Cannot Donate -->
+    <div class="edu-section flex-section">
+        <div class="image">
+            <img src="assets/images/who.png" alt="Who Can Donate" />
+        </div>
+        <div class="text">
+            <h3>Who Can Donate?</h3>
+            <p>
+                <b>Age:</b> 18–65 years (varies by country regulations).<br>
+                <b>Weight:</b> At least 50 kg (110 lbs).<br>
+                Must be in good general health.<br>
+                No recent major illnesses, infections, or risky behaviors.<br>
+            </p>
+            <br>
+
+            <h3>Who Cannot Donate?</h3>
+            <p>
+                People with certain chronic illnesses (e.g., uncontrolled diabetes, heart disease).<br>
+                Recent surgery, pregnancy, or blood transfusion.<br>
+                Travel to malaria-affected regions (temporary deferral).<br>
+                Low hemoglobin levels.<br>
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Donation Process -->
+    <div class="edu-section flex-section">
+        <div class="text">
+            <h3>Donation Process – Simple & Safe</h3>
+            <p>
+                <b>Health Check</b> – Quick questionnaire and mini-physical.<br>
+                <b>Donation</b> – Takes about 8–10 minutes.<br>
+                <b>Rest & Refresh</b> – Free snacks, water, and rest to re-energize.<br>
+                (The entire process usually takes 30–45 minutes.)
+            </p>
+        </div>
+        <div class="image">
+            <img src="assets/images/process.png" alt="Donation Process" />
+        </div>
+    </div>
+
+    <!-- Myths vs Facts -->
+    <div class="edu-section flex-section">
+        <div class="image">
+            <img src="assets/images/myth&fact.png" alt="Myths vs Facts" />
+        </div>
+        <div class="text">
+            <h3>Myths vs Facts</h3>
+            <p>
+                ✘ “Donating blood makes you weak.” <br>
+                ✔ Your body replaces the lost blood within 24–48 hours. <br><br>
+                ✘ “Blood donation is painful.” <br>
+                ✔ Only a slight pinch, like a regular injection. <br><br>
+                ✘ “Only older people need blood.” <br>
+                ✔ Accident victims, newborns, cancer patients, and mothers in childbirth often need it.
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Benefits -->
+    <div class="edu-section flex-section">
+        <div class="text">
+            <h3>Benefits of Donating Blood</h3>
+            <p>
+                Saves lives and supports community healthcare.<br>
+                Free health screening (blood pressure, hemoglobin, infections).<br>
+                Reduces harmful iron levels in frequent male donors.<br>
+                Gives a sense of purpose and contribution.<br>
+            </p>
+        </div>
+        <div class="image">
+            <img src="assets/images/benefitst.png" alt="Benefits of Blood Donation" />
+        </div>
+    </div>
+</div>
 </body>
 </html>
