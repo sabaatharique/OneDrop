@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="assets/js/dashboard.js"></script>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OneDrop | Recipient Dashboard</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <script src="assets/js/api-config.js"></script>
 </head>
 <body>
 <div class="dashboard-container">
@@ -28,9 +28,9 @@
 
         <!-- Stats cards relevant for recipients -->
         <section class="stats">
-            <div class="card">Your Requests <span>5</span></div>
-            <div class="card">Completed Requests <span>2</span></div>
-            <div class="card">Matched Donors <span>4</span></div>
+            <div class="card">Your Requests <span id="total-requests">-</span></div>
+            <div class="card">Completed Requests <span id="completed-requests">-</span></div>
+            <div class="card">Matched Donors <span id="matched-donors">-</span></div>
         </section>
 
         <!-- Tables -->
@@ -46,14 +46,79 @@
                         <th>Hospital</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr><td>01 Sep 2025</td><td>A+</td><td>Pending</td><td>City Hospital</td></tr>
-                    <tr><td>05 Sep 2025</td><td>O-</td><td>Approved</td><td>Care Center</td></tr>
+                    <tbody id="recipient-requests-body">
+                        <!-- Dynamic content will be loaded here -->
                     </tbody>
                 </table>
             </div>
         </section>
     </main>
 </div>
+
+<script>
+    const recipientId = 1; // TODO: Replace with logged-in recipient ID
+
+    // Load recipient dashboard data when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadRecipientDashboard();
+    });
+
+    async function loadRecipientDashboard() {
+        try {
+            await loadRecipientStats();
+            await loadRecipientRequests();
+        } catch (error) {
+            console.error('Error loading recipient dashboard:', error);
+        }
+    }
+
+    async function loadRecipientStats() {
+        try {
+            // Get all requests for this recipient
+            const requests = await ApiService.get(`${API_CONFIG.endpoints.requests}/recipient/${recipientId}`);
+            
+            const totalRequests = requests.length;
+            const completedRequests = requests.filter(req => req.status === 'COMPLETED').length;
+            const matchedRequests = requests.filter(req => req.status === 'MATCHED' || req.status === 'APPROVED').length;
+
+            document.getElementById('total-requests').textContent = totalRequests;
+            document.getElementById('completed-requests').textContent = completedRequests;
+            document.getElementById('matched-donors').textContent = matchedRequests;
+        } catch (error) {
+            console.error('Error loading recipient stats:', error);
+            document.getElementById('total-requests').textContent = '0';
+            document.getElementById('completed-requests').textContent = '0';
+            document.getElementById('matched-donors').textContent = '0';
+        }
+    }
+
+    async function loadRecipientRequests() {
+        const tbody = document.getElementById('recipient-requests-body');
+        Utils.showLoading(tbody);
+
+        try {
+            const requests = await ApiService.get(`${API_CONFIG.endpoints.requests}/recipient/${recipientId}`);
+            
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:10px;">No requests found</td></tr>';
+                return;
+            }
+
+            // Show only the latest 5 requests
+            const latestRequests = requests.slice(0, 5);
+            
+            tbody.innerHTML = latestRequests.map(request => `
+                <tr>
+                    <td>${Utils.formatDate(request.requiredDate)}</td>
+                    <td>${request.bloodGroup || '-'}</td>
+                    <td>${Utils.formatStatus(request.status)}</td>
+                    <td>${request.hospital || '-'}</td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            Utils.showError(tbody, 'Failed to load requests');
+        }
+    }
+</script>
 </body>
 </html>

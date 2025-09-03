@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="assets/js/dashboard.js"></script>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +7,7 @@
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     <link rel="stylesheet" href="assets/css/matches.css" />
+    <script src="assets/js/api-config.js"></script>
 </head>
 <body>
 <div class="dashboard-container">
@@ -41,16 +41,46 @@
                         <th>Hospital</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr><td>Michael Johnson</td><td>John Doe</td><td>A+</td><td>02 Sep 2025</td><td>City Hospital</td></tr>
-                    <tr><td>Sara Williams</td><td>Jane Smith</td><td>O-</td><td>06 Sep 2025</td><td>Care Center</td></tr>
-                    <tr><td>Alex Smith</td><td>Sam Wilson</td><td>B+</td><td>10 Sep 2025</td><td>Health Clinic</td></tr>
-                    <tr><td>Linda Brown</td><td>Linda Brown</td><td>AB+</td><td>13 Sep 2025</td><td>Community Hospital</td></tr>
+                    <tbody id="matches-body">
+                        <!-- Dynamic content will be loaded here -->
                     </tbody>
                 </table>
             </div>
         </section>
     </main>
 </div>
+
+<script>
+    // Load matches data when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadMatches();
+    });
+
+    async function loadMatches() {
+        const tbody = document.getElementById('matches-body');
+        Utils.showLoading(tbody);
+
+        try {
+            const matches = await ApiService.get(API_CONFIG.endpoints.matches);
+            
+            if (matches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:10px;">No matches found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = matches.map(match => `
+                <tr>
+                    <td>${match.donorName || 'Unknown'}</td>
+                    <td>${match.recipientName || 'Unknown'}</td>
+                    <td>${match.bloodType || '-'}</td>
+                    <td>${Utils.formatDate(match.matchDate)}</td>
+                    <td>${match.hospital || '-'}</td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            Utils.showError(tbody, 'Failed to load matches');
+        }
+    }
+</script>
 </body>
 </html>

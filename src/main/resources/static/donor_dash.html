@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OneDrop | Donor Dashboard</title>
+    <script src="assets/js/api-config.js"></script>
     <style>
         /* Reset and base styles */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
@@ -192,7 +193,6 @@
 
 <script>
     const donorId = 1; // TODO: Replace with logged-in donor ID
-    const apiBase = "http://localhost:8080";
 
     const requestList = document.getElementById("request-list");
     const upcomingAppointment = document.getElementById("upcoming-appointment");
@@ -210,48 +210,63 @@
 
     // Fetch donor's appointment
     async function fetchAppointment() {
-      const res = await fetch(`${apiBase}/donations/donor/${donorId}`);
-      if (res.status === 204) {
-        // No active appointment
+      try {
+        const res = await fetch(`${API_CONFIG.baseUrl}/api/requests/donor/${donorId}/upcoming`);
+        if (res.status === 204 || res.status === 404) {
+          // No active appointment
+          upcomingAppointment.classList.add("hidden");
+          fetchRequests();
+        } else {
+          const data = await res.json();
+          showAppointment(data);
+        }
+      } catch (error) {
+        console.error('Error fetching appointment:', error);
         upcomingAppointment.classList.add("hidden");
         fetchRequests();
-      } else {
-        const data = await res.json();
-        showAppointment(data);
       }
     }
 
     // Show upcoming appointment
     function showAppointment(data) {
       upcomingAppointment.classList.remove("hidden");
-      hospitalEl.textContent = data.hospital;
-      dateEl.textContent = data.appointmentDate;
-      statusEl.textContent = data.status;
-      recipientNameEl.textContent = data.recipientName;
-      recipientBloodEl.textContent = data.recipientBloodType;
-      recipientLocationEl.textContent = data.recipientLocation;
+      hospitalEl.textContent = data.hospital || 'Unknown';
+      dateEl.textContent = Utils.formatDate(data.requiredDate);
+      statusEl.textContent = Utils.formatStatus(data.status);
+      recipientNameEl.textContent = data.patientName || 'Unknown';
+      recipientBloodEl.textContent = data.bloodGroup || '-';
+      recipientLocationEl.textContent = data.city || '-';
       requestList.innerHTML = ""; // Hide other requests
     }
 
     // Fetch all available requests
     async function fetchRequests() {
-      const res = await fetch(`${apiBase}/recipients/requests`);
-      const data = await res.json();
-      renderRequests(data);
+      try {
+        const data = await ApiService.get(`${API_CONFIG.endpoints.requests}/pending`);
+        renderRequests(data);
+      } catch (error) {
+        console.error('Error fetching requests:', error);
+        requestList.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Failed to load requests</div>';
+      }
     }
 
     // Render request cards
     function renderRequests(requests) {
       requestList.innerHTML = "";
+      if (requests.length === 0) {
+        requestList.innerHTML = '<div style="text-align:center; padding:20px;">No available requests</div>';
+        return;
+      }
+      
       requests.forEach(req => {
         const card = document.createElement("div");
         card.classList.add("appointment-card");
         card.innerHTML = `
-          <h3>${req.hospital}</h3>
-          <p><strong>Recipient:</strong> ${req.name}</p>
-          <p><strong>Blood Type:</strong> ${req.bloodType}</p>
-          <p><strong>Location:</strong> ${req.location}</p>
-          <p><strong>Date:</strong> ${req.requestedDate}</p>
+          <h3>${req.hospital || 'Unknown Hospital'}</h3>
+          <p><strong>Patient:</strong> ${req.patientName || 'Unknown'}</p>
+          <p><strong>Blood Type:</strong> ${req.bloodGroup || '-'}</p>
+          <p><strong>Location:</strong> ${req.city || '-'}</p>
+          <p><strong>Date:</strong> ${Utils.formatDate(req.requiredDate)}</p>
           <button class="btn" onclick="bookAppointment(${req.id})">Confirm Appointment</button>
         `;
         requestList.appendChild(card);
@@ -259,45 +274,62 @@
     }
 
     // Book an appointment
-    async function bookAppointment(recipientId) {
-      const res = await fetch(`${apiBase}/donations/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          donorId,
-          recipientId,
-          hospital: "Unknown",
-          appointmentDate: new Date().toISOString().split("T")[0]
-        }),
-      });
+    async function bookAppointment(requestId) {
+      try {
+        const res = await fetch(`${API_CONFIG.baseUrl}/api/requests/${requestId}/accept?donorID=${donorId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" }
+        });
 
-      if (res.ok) {
-        alert("Appointment booked successfully!");
-        fetchAppointment();
-      } else {
-        const error = await res.text();
-        alert(error);
+        if (res.ok) {
+          alert("Appointment booked successfully!");
+          fetchAppointment();
+        } else {
+          const error = await res.text();
+          alert(error);
+        }
+      } catch (error) {
+        console.error('Error booking appointment:', error);
+        alert('Failed to book appointment. Please try again.');
       }
     }
 
     // Cancel appointment
     cancelBtn.addEventListener("click", async () => {
-      const res = await fetch(`${apiBase}/donations/cancel/${donorId}`, { method: "DELETE" });
-      if (res.ok) {
-        alert("Appointment cancelled!");
-        fetchAppointment();
+      try {
+        // First get the current request ID, then cancel it
+        const res = await fetch(`${API_CONFIG.baseUrl}/api/requests/donor/${donorId}/upcoming`);
+        if (res.ok) {
+          const request = await res.json();
+          const cancelRes = await fetch(`${API_CONFIG.baseUrl}/api/requests/${request.id}/cancel`, { 
+            method: "PUT" 
+          });
+          if (cancelRes.ok) {
+            alert("Appointment cancelled!");
+            fetchAppointment();
+          } else {
+            alert("Failed to cancel appointment");
+          }
+        }
+      } catch (error) {
+        console.error('Error cancelling appointment:', error);
+        alert('Failed to cancel appointment. Please try again.');
       }
     });
 
     // Toggle past donations
     pastBtn.addEventListener("click", async () => {
       if (pastSection.style.display === "none" || pastSection.style.display === "") {
-        const res = await fetch(`${apiBase}/donations/past/${donorId}`);
-        if (res.ok) {
-          const data = await res.json();
+        try {
+          const data = await ApiService.get(`${API_CONFIG.endpoints.requests}/donor/${donorId}/history`);
           pastList.innerHTML = data.length > 0
-            ? data.map(d => `<li>${d.date} — ${d.hospital} — ${d.bloodType}</li>`).join("")
+            ? data.map(d => `<li>${Utils.formatDate(d.requiredDate)} — ${d.hospital || 'Unknown'} — ${d.bloodGroup || '-'}</li>`).join("")
             : "<li>No past donations found</li>";
+          pastSection.style.display = "block";
+          pastBtn.textContent = "Hide Past Donations";
+        } catch (error) {
+          console.error('Error fetching past donations:', error);
+          pastList.innerHTML = "<li>Failed to load past donations</li>";
           pastSection.style.display = "block";
           pastBtn.textContent = "Hide Past Donations";
         }

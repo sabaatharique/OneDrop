@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OneDrop | Donation Calendar</title>
     <link rel="stylesheet" href="assets/css/global.css">
+    <script src="assets/js/api-config.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,50 +62,92 @@
 </div>
 
 <script>
-    // Example donation history
-    const donationDates = ["2025-08-01", "2025-08-25", "2025-09-15"]; // yyyy-mm-dd
+    const donorId = 1; // TODO: Replace with logged-in donor ID
+    let donationDates = [];
 
-    // Calculate next eligibility (assuming 90 days between donations)
-    const lastDonation = new Date(donationDates[donationDates.length - 1]);
-    const nextEligible = new Date(lastDonation);
-    nextEligible.setDate(nextEligible.getDate() + 90);
-
-    const today = new Date();
-    const eligibleStatus = today >= nextEligible ? "Eligible" : "Not Eligible";
-
-    document.getElementById("nextDate").textContent = nextEligible.toDateString();
-    document.getElementById("eligibilityStatus").textContent = eligibleStatus;
-
-    // Generate simple calendar for current month
-    const calendar = document.getElementById("calendar");
-    const monthNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    monthNames.forEach(day => {
-        const div = document.createElement("div");
-        div.textContent = day;
-        div.classList.add("header");
-        calendar.appendChild(div);
+    // Load donation calendar when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadDonationCalendar();
     });
 
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    async function loadDonationCalendar() {
+        try {
+            // Fetch donation history from API
+            const donations = await ApiService.get(`${API_CONFIG.endpoints.requests}/donor/${donorId}/history`);
+            
+            // Extract completed donation dates
+            donationDates = donations
+                .filter(donation => donation.status === 'COMPLETED')
+                .map(donation => {
+                    const date = new Date(donation.requiredDate);
+                    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                });
 
-    // Add blank divs for first day offset
-    for(let i=0;i<firstDay;i++){
-        const div = document.createElement("div");
-        calendar.appendChild(div);
+            updateEligibilityStatus();
+            generateCalendar();
+        } catch (error) {
+            console.error('Error loading donation calendar:', error);
+            // Show default calendar with no donations
+            updateEligibilityStatus();
+            generateCalendar();
+        }
     }
 
-    // Add days
-    for(let day=1; day<=daysInMonth; day++){
-        const div = document.createElement("div");
-        const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        div.textContent = day;
-        if(donationDates.includes(dayStr)){
-            div.classList.add("donation");
+    function updateEligibilityStatus() {
+        const today = new Date();
+        let nextEligible;
+        let eligibleStatus;
+
+        if (donationDates.length > 0) {
+            // Calculate next eligibility (assuming 90 days between donations)
+            const lastDonation = new Date(donationDates[donationDates.length - 1]);
+            nextEligible = new Date(lastDonation);
+            nextEligible.setDate(nextEligible.getDate() + 90);
+            eligibleStatus = today >= nextEligible ? "Eligible" : "Not Eligible";
+        } else {
+            // No previous donations, eligible immediately
+            nextEligible = today;
+            eligibleStatus = "Eligible";
         }
-        calendar.appendChild(div);
+
+        document.getElementById("nextDate").textContent = nextEligible.toDateString();
+        document.getElementById("eligibilityStatus").textContent = eligibleStatus;
+    }
+
+    function generateCalendar() {
+        const calendar = document.getElementById("calendar");
+        calendar.innerHTML = ''; // Clear existing calendar
+
+        const monthNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        monthNames.forEach(day => {
+            const div = document.createElement("div");
+            div.textContent = day;
+            div.classList.add("header");
+            calendar.appendChild(div);
+        });
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Add blank divs for first day offset
+        for(let i = 0; i < firstDay; i++){
+            const div = document.createElement("div");
+            calendar.appendChild(div);
+        }
+
+        // Add days
+        for(let day = 1; day <= daysInMonth; day++){
+            const div = document.createElement("div");
+            const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            div.textContent = day;
+            if(donationDates.includes(dayStr)){
+                div.classList.add("donation");
+            }
+            calendar.appendChild(div);
+        }
     }
 </script>
 </body>

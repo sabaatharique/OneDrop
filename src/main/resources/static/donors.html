@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     <link rel="stylesheet" href="assets/css/donors.css" />
+    <script src="assets/js/api-config.js"></script>
 </head>
 <body>
 <div class="dashboard-container">
@@ -36,11 +37,8 @@
                         <th>Location</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr><td>Michael Johnson</td><td>A+</td><td>34</td><td>01 Sep 2025</td><td>City Hospital</td></tr>
-                    <tr><td>Sara Williams</td><td>O-</td><td>29</td><td>15 Aug 2025</td><td>Care Center</td></tr>
-                    <tr><td>Alex Smith</td><td>B+</td><td>41</td><td>20 Jul 2025</td><td>Health Clinic</td></tr>
-                    <tr><td>Linda Brown</td><td>AB+</td><td>36</td><td>05 Sep 2025</td><td>Community Hospital</td></tr>
+                    <tbody id="donors-body">
+                        <!-- Dynamic content will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -49,27 +47,60 @@
 </div>
 
 <script>
-    // Simulate user type: "donor" or "recipient"
-    const userType = "donor"; // Change to "recipient" for recipient view
+    // Load donors data when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadDonors();
+        setupSidebar();
+    });
 
-    const sidebar = document.getElementById("sidebar-links");
+    async function loadDonors() {
+        const tbody = document.getElementById('donors-body');
+        Utils.showLoading(tbody);
 
-    if (userType === "donor") {
-        sidebar.innerHTML = `
-            <a href="donor_dash.html" class="active">Dashboard</a>
-            <a href="donors.html">Donors</a>
-            <a href="recipients.html">Recipients</a>
-            <a href="requests.html">Requests</a>
-            <a href="matches.html">Matches</a>
-        `;
-    } else if (userType === "recipient") {
-        sidebar.innerHTML = `
-            <a href="recipient_dash.html" class="active">Dashboard</a>
-            <a href="donors.html">Donors</a>
-            <a href="recipients.html">Recipients</a>
-            <a href="requests.html">Requests</a>
-            <a href="matches.html">Matches</a>
-        `;
+        try {
+            const donors = await ApiService.get(API_CONFIG.endpoints.donors);
+            
+            if (donors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:10px;">No donors found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = donors.map(donor => `
+                <tr>
+                    <td>${donor.name || 'Unknown'}</td>
+                    <td>${donor.bloodType || '-'}</td>
+                    <td>${donor.age || '-'}</td>
+                    <td>${Utils.formatDate(donor.lastDonationDate)}</td>
+                    <td>${donor.location || '-'}</td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            Utils.showError(tbody, 'Failed to load donors');
+        }
+    }
+
+    function setupSidebar() {
+        // Simulate user type: "donor" or "recipient"
+        const userType = "donor"; // Change to "recipient" for recipient view
+        const sidebar = document.getElementById("sidebar-links");
+
+        if (userType === "donor") {
+            sidebar.innerHTML = `
+                <a href="donor_dash.html">Dashboard</a>
+                <a href="donors.html" class="active">Donors</a>
+                <a href="recipients.html">Recipients</a>
+                <a href="requests.html">Requests</a>
+                <a href="matches.html">Matches</a>
+            `;
+        } else if (userType === "recipient") {
+            sidebar.innerHTML = `
+                <a href="recipient_dash.html">Dashboard</a>
+                <a href="donors.html" class="active">Donors</a>
+                <a href="recipients.html">Recipients</a>
+                <a href="requests.html">Requests</a>
+                <a href="matches.html">Matches</a>
+            `;
+        }
     }
 </script>
 </body>

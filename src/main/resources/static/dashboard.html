@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="assets/js/dashboard.js"></script>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OneDrop | Dashboard</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <script src="assets/js/api-config.js"></script>
+    <script src="assets/js/auth.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -28,10 +29,10 @@
             </header>
 
             <section class="stats">
-                <div class="card">Donors <span>120</span></div>
-                <div class="card">Recipients <span>80</span></div>
-                <div class="card">Requests <span>50</span></div>
-                <div class="card">Matches <span>30</span></div>
+                <div class="card">Donors <span id="donors-count">-</span></div>
+                <div class="card">Recipients <span id="recipients-count">-</span></div>
+                <div class="card">Requests <span id="requests-count">-</span></div>
+                <div class="card">Matches <span id="matches-count">-</span></div>
             </section>
 
             <section class="tables">
@@ -45,32 +46,125 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr><td>John Doe</td><td>A+</td><td>Pending</td></tr>
-                            <tr><td>Jane Smith</td><td>O-</td><td>Approved</td></tr>
-                            <tr><td>Sam Wilson</td><td>B+</td><td>Matched</td></tr>
+                        <tbody id="latest-requests-body">
+                            <!-- Dynamic content will be loaded here -->
                         </tbody>
                     </table>
                 </div>
                 <div class="table-container">
-                    <h2>Unga Bunga</h2>
+                    <h2>Recent Matches</h2>
                     <table>
                         <thead>
                             <tr>
                                 <th>Donor</th>
-                                <th>Date</th>
-                                <th>Location</th>
+                                <th>Recipient</th>
+                                <th>Blood Type</th>
+                                <th>Hospital</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr><td>Michael</td><td>02 Sep</td><td>City Hospital</td></tr>
-                            <tr><td>Sara</td><td>05 Sep</td><td>Care Center</td></tr>
-                            <tr><td>Alex</td><td>09 Sep</td><td>Health Clinic</td></tr>
+                        <tbody id="recent-matches-body">
+                            <!-- Dynamic content will be loaded here -->
                         </tbody>
                     </table>
                 </div>
             </section>
         </main>
     </div>
+
+    <script>
+        // Check authentication and load dashboard data when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check if user is authenticated
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Setup logout functionality
+            setupLogout();
+
+            // Load dashboard data
+            await loadDashboardData();
+        });
+
+        function setupLogout() {
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to logout?')) {
+                        AuthService.logout();
+                    }
+                });
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load statistics
+                const stats = await DashboardService.getStats();
+                document.getElementById('donors-count').textContent = stats.donors;
+                document.getElementById('recipients-count').textContent = stats.recipients;
+                document.getElementById('requests-count').textContent = stats.requests;
+                document.getElementById('matches-count').textContent = stats.matches;
+
+                // Load latest requests
+                await loadLatestRequests();
+                
+                // Load recent matches
+                await loadRecentMatches();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadLatestRequests() {
+            const tbody = document.getElementById('latest-requests-body');
+            Utils.showLoading(tbody);
+
+            try {
+                const requests = await DashboardService.getLatestRequests(3);
+                
+                if (requests.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:10px;">No pending requests</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = requests.map(request => `
+                    <tr>
+                        <td>${request.patientName || 'Unknown'}</td>
+                        <td>${request.bloodGroup || '-'}</td>
+                        <td>${Utils.formatStatus(request.status)}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                Utils.showError(tbody, 'Failed to load latest requests');
+            }
+        }
+
+        async function loadRecentMatches() {
+            const tbody = document.getElementById('recent-matches-body');
+            Utils.showLoading(tbody);
+
+            try {
+                const matches = await DashboardService.getRecentMatches(3);
+                
+                if (matches.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:10px;">No recent matches</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = matches.map(match => `
+                    <tr>
+                        <td>${match.donorName || 'Unknown'}</td>
+                        <td>${match.recipientName || 'Unknown'}</td>
+                        <td>${match.bloodType || '-'}</td>
+                        <td>${match.hospital || '-'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                Utils.showError(tbody, 'Failed to load recent matches');
+            }
+        }
+    </script>
 </body>
 </html>

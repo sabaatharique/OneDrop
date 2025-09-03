@@ -6,6 +6,7 @@
     <title>OneDrop | Track Donations</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
+    <script src="assets/js/api-config.js"></script>
     <style>
         /* Table container */
         .tables {
@@ -102,35 +103,8 @@
                         <th>Status</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr>
-                        <td>02 Sep 2025</td>
-                        <td>John Doe</td>
-                        <td>A+</td>
-                        <td>City Hospital</td>
-                        <td class="status-completed">Completed</td>
-                    </tr>
-                    <tr>
-                        <td>05 Sep 2025</td>
-                        <td>Jane Smith</td>
-                        <td>O-</td>
-                        <td>Care Center</td>
-                        <td class="status-pending">Pending</td>
-                    </tr>
-                    <tr>
-                        <td>10 Sep 2025</td>
-                        <td>Alex Brown</td>
-                        <td>B+</td>
-                        <td>Health Clinic</td>
-                        <td class="status-cancelled">Cancelled</td>
-                    </tr>
-                    <tr>
-                        <td>15 Sep 2025</td>
-                        <td>Linda White</td>
-                        <td>AB+</td>
-                        <td>Community Hospital</td>
-                        <td class="status-completed">Completed</td>
-                    </tr>
+                    <tbody id="donation-history-body">
+                        <!-- Dynamic content will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -139,21 +113,86 @@
 </div>
 
 <script>
-    const statusFilter = document.getElementById('statusFilter');
-    const table = document.getElementById('donationTable').getElementsByTagName('tbody')[0];
+    const donorId = 1; // TODO: Replace with logged-in donor ID
+    let allDonations = []; // Store all donations for filtering
 
-    statusFilter.addEventListener('change', () => {
-        const filterValue = statusFilter.value;
-
-        for (let row of table.rows) {
-            const statusCell = row.cells[4].textContent.toLowerCase();
-            if (filterValue === 'all' || statusCell === filterValue) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        }
+    // Load donation history when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadDonationHistory();
+        setupFilter();
     });
+
+    async function loadDonationHistory() {
+        const tbody = document.getElementById('donation-history-body');
+        Utils.showLoading(tbody);
+
+        try {
+            // Fetch donation history from API
+            const donations = await ApiService.get(`${API_CONFIG.endpoints.requests}/donor/${donorId}/history`);
+            allDonations = donations;
+            
+            if (donations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:10px;">No donation history found</td></tr>';
+                return;
+            }
+
+            renderDonations(donations);
+        } catch (error) {
+            console.error('Error loading donation history:', error);
+            Utils.showError(tbody, 'Failed to load donation history');
+        }
+    }
+
+    function renderDonations(donations) {
+        const tbody = document.getElementById('donation-history-body');
+        
+        tbody.innerHTML = donations.map(donation => {
+            const statusClass = getStatusClass(donation.status);
+            const statusText = Utils.formatStatus(donation.status);
+            
+            return `
+                <tr>
+                    <td>${Utils.formatDate(donation.requiredDate)}</td>
+                    <td>${donation.patientName || 'Unknown'}</td>
+                    <td>${donation.bloodGroup || '-'}</td>
+                    <td>${donation.hospital || '-'}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function getStatusClass(status) {
+        switch (status?.toUpperCase()) {
+            case 'COMPLETED':
+                return 'status-completed';
+            case 'PENDING':
+                return 'status-pending';
+            case 'CANCELLED':
+            case 'REJECTED':
+                return 'status-cancelled';
+            default:
+                return '';
+        }
+    }
+
+    function setupFilter() {
+        const statusFilter = document.getElementById('statusFilter');
+        const table = document.getElementById('donationTable').getElementsByTagName('tbody')[0];
+
+        statusFilter.addEventListener('change', () => {
+            const filterValue = statusFilter.value;
+
+            for (let row of table.rows) {
+                const statusCell = row.cells[4].textContent.toLowerCase();
+                if (filterValue === 'all' || statusCell === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
 </script>
 </body>
 </html>
