@@ -37,7 +37,10 @@ public class DonorService {
                 saved.getId(),
                 saved.getBloodType(),
                 saved.isEligibleToDonate(),
-                saved.getUser().getId()
+                saved.getUser().getId(),
+                saved.getUser().getFullName(),
+                saved.getUser().getEmail(),
+                saved.getUser().getPhone()
         );
     }
 
@@ -49,7 +52,10 @@ public class DonorService {
                         d.getId(),
                         d.getBloodType(),
                         d.isEligibleToDonate(),
-                        d.getUser().getId()
+                        d.getUser().getId(),
+                        d.getUser().getFullName(),
+                        d.getUser().getEmail(),
+                        d.getUser().getPhone()
                 ))
                 .collect(Collectors.toList());
     }
@@ -63,7 +69,10 @@ public class DonorService {
                 donor.getId(),
                 donor.getBloodType(),
                 donor.isEligibleToDonate(),
-                donor.getUser().getId()
+                donor.getUser().getId(),
+                donor.getUser().getFullName(),
+                donor.getUser().getEmail(),
+                donor.getUser().getPhone()
         );
     }
 

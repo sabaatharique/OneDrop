@@ -8,37 +8,32 @@
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     <style>
         .profile-card {
-            background: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+          background: #fff;
+          padding: 25px;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          margin-bottom: 20px;
         }
-
         .profile-card h2 {
-            margin-bottom: 20px;
-            color: #dc2626;
+          margin-bottom: 20px;
+          color: #dc2626;
         }
-
         .profile-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
         }
-
         .profile-info div {
-            background: #f3f4f6;
-            padding: 15px;
-            border-radius: 6px;
+          background: #f3f4f6;
+          padding: 15px;
+          border-radius: 6px;
         }
-
         .profile-info div h3 {
-            margin-bottom: 8px;
-            color: #dc2626;
+          margin-bottom: 8px;
+          color: #dc2626;
         }
-
         .profile-info div p {
-            margin: 0;
+          margin: 0;
         }
     </style>
 </head>
@@ -46,40 +41,13 @@
 <div class="dashboard-container">
     <aside class="sidebar">
         <h2>OneDrop</h2>
-        <nav id="sidebar-links">
-            <!-- Links injected dynamically -->
-        </nav>
+        <nav id="sidebar-links"></nav>
     </aside>
-
-    <script>
-        // Simulate user type: "donor" or "recipient"
-        const userType = "donor"; // change to "recipient" for recipient view
-
-        const sidebar = document.getElementById("sidebar-links");
-
-        if (userType === "donor") {
-            sidebar.innerHTML = `
-                <a href="donor_dash.html" class="active">Dashboard</a>
-            <a href="request_page.html">Find requests</a>
-            <a href="track_donations.html">Track Donations</a>
-            <a href="donation_calendar.html">Donation Calendar</a>
-            `;
-        } else if (userType === "recipient") {
-            sidebar.innerHTML = `
-                <a href="recipient_dash.html" class="active">Dashboard</a>
-                <a href="donors.html">Donors</a>
-                <a href="recipients.html">Recipients</a>
-                <a href="requests.html">Requests</a>
-                <a href="matches.html">Matches</a>
-            `;
-        }
-    </script>
-
 
     <main class="main-content">
         <header class="topbar">
             <h1>User Profile</h1>
-            <button class="logout-btn">Logout</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
 
         <section class="tables">
@@ -88,32 +56,85 @@
                 <div class="profile-info">
                     <div>
                         <h3>Name</h3>
-                        <p>John Doe</p>
+                        <p id="name">Loading...</p>
                     </div>
                     <div>
                         <h3>Blood Group</h3>
-                        <p>A+</p>
+                        <p id="bloodType">Loading...</p>
                     </div>
                     <div>
-                        <h3>Last Donated</h3>
-                        <p>15 May 2025</p>
+                        <h3>Email</h3>
+                        <p id="email">Loading...</p>
                     </div>
                     <div>
-                        <h3>Last Received Request</h3>
-                        <p>02 Jun 2025</p>
-                    </div>
-                    <div>
-                        <h3>Total Donations</h3>
-                        <p>12</p>
-                    </div>
-                    <div>
-                        <h3>Total Received</h3>
-                        <p>3</p>
+                        <h3>Phone</h3>
+                        <p id="phone">Loading...</p>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const role = localStorage.getItem("userRole");
+    const sidebar = document.getElementById("sidebar-links");
+
+    if (role === "DONOR") {
+      sidebar.innerHTML = `
+        <a href="profile_page.html" class="active">Dashboard</a>
+        <a href="request_page.html">Find Requests</a>
+        <a href="track_donations.html">Track Donations</a>
+        <a href="donation_calendar.html">Donation Calendar</a>
+      `;
+    } else if (role === "RECIPIENT") {
+      sidebar.innerHTML = `
+        <a href="profile_page.html" class="active">Dashboard</a>
+        <a href="requests.html">Create Request</a>
+        <a href="request_hist.html">Request History</a>
+      `;
+    }
+
+    async function loadProfile() {
+      try {
+        const token = localStorage.getItem("jwtToken");
+        const donorId = localStorage.getItem("donorId");
+        const recipientId = localStorage.getItem("recipientId");
+
+        if (role === "DONOR" && donorId) {
+                    const res = await axios.get(`/api/donors/${donorId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const donor = res.data;
+          document.getElementById("name").textContent = donor.fullName || "N/A";
+          document.getElementById("bloodType").textContent = donor.bloodType || "N/A";
+          document.getElementById("email").textContent = donor.email || "N/A";
+          document.getElementById("phone").textContent = donor.phone || "N/A";
+        }
+
+        if (role === "RECIPIENT" && recipientId) {
+                    const res = await axios.get(`/api/recipients/${recipientId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const recipient = res.data;
+          document.getElementById("name").textContent = recipient.fullName || "N/A";
+          document.getElementById("bloodType").textContent = recipient.bloodType || "N/A";
+          document.getElementById("email").textContent = recipient.email || "N/A";
+          document.getElementById("phone").textContent = recipient.phone || "N/A";
+        }
+      } catch (err) {
+        console.error("Could not load profile:", err);
+        document.getElementById("name").textContent = "Error loading profile";
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    loadProfile();
+</script>
 </body>
 </html>

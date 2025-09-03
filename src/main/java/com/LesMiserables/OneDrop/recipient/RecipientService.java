@@ -33,7 +33,10 @@ public class RecipientService {
 
         return new RecipientResponseDTO(
                 saved.getId(),
-                saved.getUser().getId()
+                saved.getUser().getId(),
+                saved.getUser().getFullName(),
+                saved.getUser().getEmail(),
+                saved.getUser().getPhone()
         );
     }
 
@@ -43,7 +46,10 @@ public class RecipientService {
                 .stream()
                 .map(d -> new RecipientResponseDTO(
                         d.getId(),
-                        d.getUser().getId()
+                        d.getUser().getId(),
+                        d.getUser().getFullName(),
+                        d.getUser().getEmail(),
+                        d.getUser().getPhone()
                 ))
                 .collect(Collectors.toList());
     }
@@ -55,7 +61,10 @@ public class RecipientService {
 
         return new RecipientResponseDTO(
                 recipient.getId(),
-                recipient.getUser().getId()
+                recipient.getUser().getId(),
+                recipient.getUser().getFullName(),
+                recipient.getUser().getEmail(),
+                recipient.getUser().getPhone()
         );
     }
 
