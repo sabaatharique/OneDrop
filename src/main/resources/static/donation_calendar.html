@@ -26,6 +26,60 @@
         .info-card { flex: 1; background: #f8fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #dc2626; }
         .info-card h3 { margin: 0 0 10px 0; color: #374151; font-size: 1.1rem; }
         .info-card p { margin: 0; font-size: 1.2rem; font-weight: bold; color: #1f2937; }
+        .editable-field { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .editable-field input { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            color: #1f2937; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 4px; 
+            padding: 8px; 
+            background: #fff;
+        }
+        .editable-field input:focus { 
+            outline: none; 
+            border-color: #dc2626; 
+        }
+        .edit-btn { 
+            background: #dc2626; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+        }
+        .edit-btn:hover { 
+            background: #b91c1c; 
+        }
+        .save-btn { 
+            background: #059669; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+        }
+        .save-btn:hover { 
+            background: #047857; 
+        }
+        .cancel-btn { 
+            background: #6b7280; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+        }
+        .cancel-btn:hover { 
+            background: #4b5563; 
+        }
         .next-eligibility { background: #fef3c7; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; }
 
         /* Back to home button top-right */
@@ -75,7 +129,13 @@
             <div class="donation-info">
                 <div class="info-card">
                     <h3>Last Donation</h3>
-                    <p id="lastDonationDate">Loading...</p>
+                    <div class="editable-field">
+                        <input type="date" id="lastDonationDateInput" style="display: none;">
+                        <p id="lastDonationDate">Loading...</p>
+                        <button class="edit-btn" id="editLastDonationBtn" onclick="toggleEditLastDonation()">Edit</button>
+                        <button class="save-btn" id="saveLastDonationBtn" onclick="saveLastDonation()" style="display: none;">Save</button>
+                        <button class="cancel-btn" id="cancelLastDonationBtn" onclick="cancelEditLastDonation()" style="display: none;">Cancel</button>
+                    </div>
                 </div>
                 <div class="info-card">
                     <h3>Next Eligible Date</h3>
@@ -141,10 +201,14 @@
         const lastDonationDate = donor.lastDonationDate;
         const today = new Date();
         
+        // Store original data for cancel functionality
+        window.originalLastDonationDate = lastDonationDate;
+        
         // Display last donation date
         if (lastDonationDate) {
             const lastDate = new Date(lastDonationDate);
             document.getElementById('lastDonationDate').textContent = lastDate.toLocaleDateString();
+            document.getElementById('lastDonationDateInput').value = lastDonationDate.split('T')[0]; // Format for date input
             
             // Calculate next eligible date (3 months after last donation)
             const nextEligible = new Date(lastDate);
@@ -159,9 +223,115 @@
         } else {
             // No previous donations
             document.getElementById('lastDonationDate').textContent = 'No previous donations';
+            document.getElementById('lastDonationDateInput').value = '';
             document.getElementById('nextEligibleDate').textContent = 'Eligible now';
             document.getElementById('nextDate').textContent = 'Eligible now';
             document.getElementById('eligibilityStatus').textContent = 'Eligible';
+        }
+    }
+
+    function toggleEditLastDonation() {
+        const dateDisplay = document.getElementById('lastDonationDate');
+        const dateInput = document.getElementById('lastDonationDateInput');
+        const editBtn = document.getElementById('editLastDonationBtn');
+        const saveBtn = document.getElementById('saveLastDonationBtn');
+        const cancelBtn = document.getElementById('cancelLastDonationBtn');
+        
+        // Show input, hide display
+        dateDisplay.style.display = 'none';
+        dateInput.style.display = 'block';
+        editBtn.style.display = 'none';
+        saveBtn.style.display = 'inline-block';
+        cancelBtn.style.display = 'inline-block';
+        
+        // Focus on the input
+        dateInput.focus();
+    }
+
+    function cancelEditLastDonation() {
+        const dateDisplay = document.getElementById('lastDonationDate');
+        const dateInput = document.getElementById('lastDonationDateInput');
+        const editBtn = document.getElementById('editLastDonationBtn');
+        const saveBtn = document.getElementById('saveLastDonationBtn');
+        const cancelBtn = document.getElementById('cancelLastDonationBtn');
+        
+        // Reset to original value
+        if (window.originalLastDonationDate) {
+            dateInput.value = window.originalLastDonationDate.split('T')[0];
+        } else {
+            dateInput.value = '';
+        }
+        
+        // Show display, hide input
+        dateDisplay.style.display = 'block';
+        dateInput.style.display = 'none';
+        editBtn.style.display = 'inline-block';
+        saveBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+    }
+
+    async function saveLastDonation() {
+        const dateInput = document.getElementById('lastDonationDateInput');
+        const newDate = dateInput.value;
+        
+        if (!newDate) {
+            alert('Please select a valid date');
+            return;
+        }
+        
+        const token = localStorage.getItem('jwtToken');
+        const userId = localStorage.getItem('userId');
+        
+        try {
+            const response = await fetch(`http://localhost:8000/api/donors/${userId}/last-donation`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ lastDonationDate: newDate })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Update the display with new date
+            const lastDate = new Date(newDate);
+            document.getElementById('lastDonationDate').textContent = lastDate.toLocaleDateString();
+            
+            // Recalculate next eligible date
+            const nextEligible = new Date(lastDate);
+            nextEligible.setMonth(nextEligible.getMonth() + 3);
+            
+            document.getElementById('nextEligibleDate').textContent = nextEligible.toLocaleDateString();
+            document.getElementById('nextDate').textContent = nextEligible.toDateString();
+            
+            // Check eligibility status
+            const today = new Date();
+            const eligibleStatus = today >= nextEligible ? "Eligible" : "Not Eligible";
+            document.getElementById('eligibilityStatus').textContent = eligibleStatus;
+            
+            // Update original date for future cancels
+            window.originalLastDonationDate = newDate;
+            
+            // Exit edit mode
+            const dateDisplay = document.getElementById('lastDonationDate');
+            const editBtn = document.getElementById('editLastDonationBtn');
+            const saveBtn = document.getElementById('saveLastDonationBtn');
+            const cancelBtn = document.getElementById('cancelLastDonationBtn');
+            
+            dateDisplay.style.display = 'block';
+            dateInput.style.display = 'none';
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+            
+            alert('Last donation date updated successfully!');
+            
+        } catch (error) {
+            console.error('Error updating last donation date:', error);
+            alert('Error updating last donation date. Please try again.');
         }
     }
 </script>

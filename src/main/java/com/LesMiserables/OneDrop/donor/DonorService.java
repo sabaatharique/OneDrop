@@ -7,6 +7,7 @@ import com.LesMiserables.OneDrop.donor.dto.DonorRequestDTO;
 import com.LesMiserables.OneDrop.donor.dto.DonorResponseDTO;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,5 +103,25 @@ public class DonorService {
             throw new DonorNotFoundException("Donor not found with id: " + id);
         }
         donorRepository.deleteById(id);
+    }
+
+    // update last donation date by user ID
+    public DonorResponseDTO updateLastDonationDate(Long userId, LocalDate lastDonationDate) {
+        Donor donor = donorRepository.findByUserId(userId)
+                .orElseThrow(() -> new DonorNotFoundException("Donor not found with user id: " + userId));
+        
+        donor.setLastDonationDate(lastDonationDate);
+        Donor saved = donorRepository.save(donor);
+        
+        return new DonorResponseDTO(
+                saved.getId(),
+                saved.getBloodType(),
+                saved.isEligibleToDonate(),
+                saved.getUser().getId(),
+                saved.getUser().getFullName(),
+                saved.getUser().getEmail(),
+                saved.getUser().getPhone(),
+                saved.getLastDonationDate()
+        );
     }
 }

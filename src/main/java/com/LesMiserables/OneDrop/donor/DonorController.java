@@ -2,6 +2,7 @@ package com.LesMiserables.OneDrop.donor;
 
 import com.LesMiserables.OneDrop.donor.dto.DonorRequestDTO;
 import com.LesMiserables.OneDrop.donor.dto.DonorResponseDTO;
+import com.LesMiserables.OneDrop.donor.dto.UpdateLastDonationDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +47,13 @@ public class DonorController {
     public ResponseEntity<String> deleteDonor(@PathVariable Long id) {
         donorService.deleteDonor(id);
         return new ResponseEntity<>("Donor deleted successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("/{userId}/last-donation")
+    public ResponseEntity<DonorResponseDTO> updateLastDonationDate(
+            @PathVariable Long userId, 
+            @RequestBody UpdateLastDonationDTO request) {
+        DonorResponseDTO response = donorService.updateLastDonationDate(userId, request.getLastDonationDate());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
