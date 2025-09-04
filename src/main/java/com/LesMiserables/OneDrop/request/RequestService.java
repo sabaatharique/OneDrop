@@ -187,6 +187,12 @@ public class RequestService {
     }
 
     public RequestDTO mapToDto(Request request) {
+        // Fetch donor phone if MATCHED
+        String donorPhone = null;
+        if (request.getStatus() == Request.Status.MATCHED && request.getMatchedDonor() != null) {
+            donorPhone = request.getMatchedDonor().getUser().getPhone();
+        }
+        
         return new RequestDTO(
                 request.getId(),
                 request.getRecipient().getId(),
@@ -199,7 +205,8 @@ public class RequestService {
                 request.getStatus(),
                 request.getCreatedAt(),
                 request.getRequiredBy(),
-                request.getRecipientPhone()
+                request.getRecipientPhone(),
+                donorPhone
         );
     }
 

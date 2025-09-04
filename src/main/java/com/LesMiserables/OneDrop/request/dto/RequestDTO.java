@@ -22,4 +22,5 @@ public class RequestDTO {
     private LocalDateTime createdAt;
     private LocalDateTime requiredBy;
     private String recipientPhone;
+    private String donorPhone;
 }

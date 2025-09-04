@@ -6,10 +6,9 @@
     <title>OneDrop | Request History</title>
     <link rel="stylesheet" href="assets/css/global.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
-    
+
     <script src="assets/js/auth.js"></script>
     <style>
-
         .table-container {
             background: #fff;
             padding: 20px;
@@ -45,28 +44,25 @@
             color: white;
             font-weight: bold;
         }
-
-         .back-btn {
-        display: inline-block;
-        margin-top: 15px;
-        text-decoration: none;
-        color: #c62828;
-        font-weight: bold;
-        padding: 10px 20px;
-        background: #dc2626;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background 0.3s;
-        width : auto;
+        .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #c62828;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            width : auto;
         }
-
         .back-btn:hover {
             background: #b91c1c;
         }
-
         .status-pending { background: #f59e0b; }
         .status-approved { background: #16a34a; }
         .status-rejected { background: #dc2626; }
@@ -82,7 +78,6 @@
         <nav>
             <a href="profile_page.html">Dashboard</a>
             <a href="requests.html">Create Request</a>
-           <!-- <a href="request_track.html">Request Update</a> -->
             <a href="request_hist.html" class="active">Request History</a>
         </nav>
     </aside>
@@ -102,6 +97,7 @@
                     <th>Blood Type</th>
                     <th>Status</th>
                     <th>Address</th>
+                    <th>Donor Contact</th>
                 </tr>
                 </thead>
                 <tbody id="historyBody">
@@ -115,32 +111,33 @@
 
 <script>
     const Utils = {
-    formatDate: function(dateString) {
-        if (!dateString) return '-';
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-    formatStatus: function(status) {
-        if (!status) return '-';
-        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-    }
-};
+        formatDate: function(dateString) {
+            if (!dateString) return '-';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        },
+        formatStatus: function(status) {
+            if (!status) return '-';
+            return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        }
+    };
 
-function getStatusClass(status) {
-    if (!status) return '';
-    switch(status.toUpperCase()) {
-        case 'PENDING': return 'status-pending';
-        case 'MATCHED': return 'status-matched';
-        case 'FULFILLED': return 'status-completed';
-        case 'CANCELLED': return 'status-cancelled';
-        case 'EXPIRED': return 'status-rejected';
-        default: return '';
+    function getStatusClass(status) {
+        if (!status) return '';
+        switch(status.toUpperCase()) {
+            case 'PENDING': return 'status-pending';
+            case 'MATCHED': return 'status-matched';
+            case 'FULFILLED': return 'status-completed';
+            case 'CANCELLED': return 'status-cancelled';
+            case 'EXPIRED': return 'status-rejected';
+            default: return '';
+        }
     }
-}
+
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('jwtToken');
         const userRole = localStorage.getItem('userRole');
-        const activeProfile = localStorage.getItem('activeProfile'); // Get active profile
+        const activeProfile = localStorage.getItem('activeProfile');
 
         if (!token) {
             window.location.href = 'login.html';
@@ -154,14 +151,10 @@ function getStatusClass(status) {
             if (activeProfile === 'RECIPIENT') {
                 userIdToFetch = localStorage.getItem('recipientId');
                 userTypeToFetch = 'recipient';
-            } else if (activeProfile === 'DONOR') {
+            } else {
                 userIdToFetch = localStorage.getItem('donorId');
                 userTypeToFetch = 'donor';
-            } else {
-                // Default for BOTH if activeProfile is not set (shouldn't happen if login is correct)
-                userIdToFetch = localStorage.getItem('donorId'); // Default to donor
-                userTypeToFetch = 'donor';
-                localStorage.setItem('activeProfile', 'DONOR'); // Set default
+                localStorage.setItem('activeProfile', 'DONOR');
             }
         } else if (userRole === 'RECIPIENT') {
             userIdToFetch = localStorage.getItem('recipientId');
@@ -186,14 +179,14 @@ function getStatusClass(status) {
 
     async function fetchRequestHistory(userType, userId, token) {
         try {
-            historyBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Loading...</td></tr>';
+            historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>';
             emptyMessage.classList.add("hidden");
 
             let url;
             if (userType === 'recipient') {
                 url = `http://localhost:8000/api/requests/recipient/${userId}`;
             } else if (userType === 'donor') {
-                url = `http://localhost:8000/api/requests/donor/${userId}/history`; // Assuming this endpoint exists
+                url = `http://localhost:8000/api/requests/donor/${userId}/history`;
             } else {
                 throw new Error('Invalid user type');
             }
@@ -220,11 +213,18 @@ function getStatusClass(status) {
             historyBody.innerHTML = '';
             requests.forEach(req => {
                 const tr = document.createElement("tr");
+
+                // Donor contact as plain black text
+                const donorContact = req.donorPhone && req.donorPhone !== '-'
+                    ? req.donorPhone
+                    : '-';
+
                 tr.innerHTML = `
                     <td>${Utils.formatDate(req.createdAt)}</td>
                     <td>${req.bloodType || '-'}</td>
                     <td><span class="status-btn ${getStatusClass(req.status)}">${Utils.formatStatus(req.status)}</span></td>
                     <td>${req.location?.address || '-'}</td>
+                    <td>${donorContact}</td>
                 `;
                 historyBody.appendChild(tr);
             });
@@ -235,7 +235,6 @@ function getStatusClass(status) {
             emptyMessage.classList.remove("hidden");
         }
     }
-
 </script>
 </body>
 </html>
