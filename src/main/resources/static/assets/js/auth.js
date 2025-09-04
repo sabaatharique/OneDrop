@@ -26,9 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (response.data.recipientId) {
                         localStorage.setItem('recipientId', response.data.recipientId);
+                        localStorage.removeItem('donorId');
                     }
                     if (response.data.donorId) {
                         localStorage.setItem('donorId', response.data.donorId);
+                        localStorage.removeItem('recipientId');
                     }
 
                     // Redirect based on role
@@ -132,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function logout() {
     localStorage.removeItem('jwtToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('recipientId');
+    localStorage.removeItem('donorId');
     localStorage.removeItem('userRole');
     window.location.href = 'index.html';
 }

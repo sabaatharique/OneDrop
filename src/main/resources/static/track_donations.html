@@ -59,9 +59,9 @@
         }
 
         /* Optional: status colors */
-        .status-pending { color: #f59e0b; font-weight: bold; }
-        .status-completed { color: #16a34a; font-weight: bold; }
-        .status-cancelled { color: #dc2626; font-weight: bold; }
+        .status-pending { color: #ffffff; font-weight: bold; }
+        .status-completed { color: #ffffff; font-weight: bold; }
+        .status-cancelled { color: #ffffff; font-weight: bold; }
 
         /* Filter dropdown */
         .filter-container {
@@ -163,7 +163,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-        const donorId = localStorage.getItem("userId");
+        const donorId = localStorage.getItem("donorId");
         const token = localStorage.getItem("jwtToken");
 
         if (!donorId) { alert("Donor ID not found."); return; }

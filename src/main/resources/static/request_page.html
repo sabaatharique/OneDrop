@@ -241,7 +241,7 @@
          const container = document.getElementById('requestsContainer');
          container.innerHTML = '';
 
-         const donorId = localStorage.getItem('userId');
+         const donorId = localStorage.getItem('donorId');
          if (!donorId) {
              container.innerHTML = `<div style="text-align:center; padding:20px; color:red;">
                  Please log in as a donor to view requests.
@@ -307,7 +307,7 @@
 
      // Accept request
      async function acceptRequest(requestId) {
-         const donorId = localStorage.getItem('userId');
+         const donorId = localStorage.getItem('donorId');
          if (!donorId) { alert('Please log in as a donor.'); return; }
 
          try {
