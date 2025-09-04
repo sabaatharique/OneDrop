@@ -40,7 +40,8 @@ public class DonorService {
                 saved.getUser().getId(),
                 saved.getUser().getFullName(),
                 saved.getUser().getEmail(),
-                saved.getUser().getPhone()
+                saved.getUser().getPhone(),
+                saved.getLastDonationDate()
         );
     }
 
@@ -55,7 +56,8 @@ public class DonorService {
                         d.getUser().getId(),
                         d.getUser().getFullName(),
                         d.getUser().getEmail(),
-                        d.getUser().getPhone()
+                        d.getUser().getPhone(),
+                        d.getLastDonationDate()
                 ))
                 .collect(Collectors.toList());
     }
@@ -72,7 +74,25 @@ public class DonorService {
                 donor.getUser().getId(),
                 donor.getUser().getFullName(),
                 donor.getUser().getEmail(),
-                donor.getUser().getPhone()
+                donor.getUser().getPhone(),
+                donor.getLastDonationDate()
+        );
+    }
+
+    // get donor by user ID
+    public DonorResponseDTO getDonorByUserId(Long userId) {
+        Donor donor = donorRepository.findByUserId(userId)
+                .orElseThrow(() -> new DonorNotFoundException("Donor not found with user id: " + userId));
+
+        return new DonorResponseDTO(
+                donor.getId(),
+                donor.getBloodType(),
+                donor.isEligibleToDonate(),
+                donor.getUser().getId(),
+                donor.getUser().getFullName(),
+                donor.getUser().getEmail(),
+                donor.getUser().getPhone(),
+                donor.getLastDonationDate()
         );
     }
 

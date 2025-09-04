@@ -36,6 +36,12 @@ public class DonorController {
         return new ResponseEntity<>(donor, HttpStatus.OK);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<DonorResponseDTO> getDonorByUserId(@PathVariable Long userId) {
+        DonorResponseDTO donor = donorService.getDonorByUserId(userId);
+        return new ResponseEntity<>(donor, HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteDonor(@PathVariable Long id) {
         donorService.deleteDonor(id);

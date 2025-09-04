@@ -22,10 +22,10 @@
         .topbar a { font-weight: bold; color: #000; text-decoration: none; }
 
         .calendar-container { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 800px; margin-bottom: 30px; }
-        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .calendar div { padding: 10px; border-radius: 6px; }
-        .calendar .header { font-weight: bold; background: #f3f4f6; }
-        .calendar .donation { background: #16a34a; color: #fff; font-weight: bold; }
+        .donation-info { display: flex; gap: 20px; margin-top: 20px; }
+        .info-card { flex: 1; background: #f8fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #dc2626; }
+        .info-card h3 { margin: 0 0 10px 0; color: #374151; font-size: 1.1rem; }
+        .info-card p { margin: 0; font-size: 1.2rem; font-weight: bold; color: #1f2937; }
         .next-eligibility { background: #fef3c7; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; }
 
         /* Back to home button top-right */
@@ -71,59 +71,98 @@
         </div>
 
         <div class="calendar-container">
-            <h2>Donation History</h2>
-            <div class="calendar" id="calendar">
-                <!-- Calendar populated by JS -->
+            <h2>Donation Information</h2>
+            <div class="donation-info">
+                <div class="info-card">
+                    <h3>Last Donation</h3>
+                    <p id="lastDonationDate">Loading...</p>
+                </div>
+                <div class="info-card">
+                    <h3>Next Eligible Date</h3>
+                    <p id="nextEligibleDate">Loading...</p>
+                </div>
             </div>
         </div>
     </main>
 </div>
 
 <script>
-    // Example donation history
-    const donationDates = ["2025-08-01", "2025-08-25", "2025-09-15"]; // yyyy-mm-dd
+    // Check authentication and load donor information
+    document.addEventListener('DOMContentLoaded', async function() {
+        const token = localStorage.getItem('jwtToken');
+        const userId = localStorage.getItem('userId');
+        const userRole = localStorage.getItem('userRole');
 
-    // Calculate next eligibility (assuming 90 days between donations)
-    const lastDonation = new Date(donationDates[donationDates.length - 1]);
-    const nextEligible = new Date(lastDonation);
-    nextEligible.setDate(nextEligible.getDate() + 90);
+        if (!token || !userId) {
+            alert('Please log in to view donation calendar');
+            window.location.href = 'login.html';
+            return;
+        }
 
-    const today = new Date();
-    const eligibleStatus = today >= nextEligible ? "Eligible" : "Not Eligible";
+        if (userRole !== 'DONOR' && userRole !== 'BOTH') {
+            alert('This page is only accessible to donors');
+            window.location.href = 'index.html';
+            return;
+        }
 
-    document.getElementById("nextDate").textContent = nextEligible.toDateString();
-    document.getElementById("eligibilityStatus").textContent = eligibleStatus;
-
-    // Generate simple calendar for current month
-    const calendar = document.getElementById("calendar");
-    const monthNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    monthNames.forEach(day => {
-        const div = document.createElement("div");
-        div.textContent = day;
-        div.classList.add("header");
-        calendar.appendChild(div);
+        try {
+            await loadDonorInformation(token, userId);
+        } catch (error) {
+            console.error('Error loading donor information:', error);
+            document.getElementById('lastDonationDate').textContent = 'Error loading data';
+            document.getElementById('nextEligibleDate').textContent = 'Error loading data';
+            document.getElementById('nextDate').textContent = 'Error loading data';
+            document.getElementById('eligibilityStatus').textContent = 'Error';
+        }
     });
 
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    async function loadDonorInformation(token, userId) {
+        try {
+            const response = await fetch(`http://localhost:8000/api/donors/user/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-    // Add blank divs for first day offset
-    for(let i=0;i<firstDay;i++){
-        const div = document.createElement("div");
-        calendar.appendChild(div);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const donor = await response.json();
+            displayDonorInformation(donor);
+        } catch (error) {
+            console.error('Error fetching donor information:', error);
+            throw error;
+        }
     }
 
-    // Add days
-    for(let day=1; day<=daysInMonth; day++){
-        const div = document.createElement("div");
-        const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        div.textContent = day;
-        if(donationDates.includes(dayStr)){
-            div.classList.add("donation");
+    function displayDonorInformation(donor) {
+        const lastDonationDate = donor.lastDonationDate;
+        const today = new Date();
+        
+        // Display last donation date
+        if (lastDonationDate) {
+            const lastDate = new Date(lastDonationDate);
+            document.getElementById('lastDonationDate').textContent = lastDate.toLocaleDateString();
+            
+            // Calculate next eligible date (3 months after last donation)
+            const nextEligible = new Date(lastDate);
+            nextEligible.setMonth(nextEligible.getMonth() + 3);
+            
+            document.getElementById('nextEligibleDate').textContent = nextEligible.toLocaleDateString();
+            document.getElementById('nextDate').textContent = nextEligible.toDateString();
+            
+            // Check eligibility status
+            const eligibleStatus = today >= nextEligible ? "Eligible" : "Not Eligible";
+            document.getElementById('eligibilityStatus').textContent = eligibleStatus;
+        } else {
+            // No previous donations
+            document.getElementById('lastDonationDate').textContent = 'No previous donations';
+            document.getElementById('nextEligibleDate').textContent = 'Eligible now';
+            document.getElementById('nextDate').textContent = 'Eligible now';
+            document.getElementById('eligibilityStatus').textContent = 'Eligible';
         }
-        calendar.appendChild(div);
     }
 </script>
 </body>

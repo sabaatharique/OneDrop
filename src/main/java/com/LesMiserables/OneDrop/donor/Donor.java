@@ -26,7 +26,7 @@ public class Donor {
 
     @Transient
     public boolean isEligibleToDonate() {
-        return lastDonationDate == null || lastDonationDate.isBefore(LocalDate.now().minusDays(90));
+        return lastDonationDate == null || lastDonationDate.isBefore(LocalDate.now().minusMonths(3));
     }
 
     @OneToOne

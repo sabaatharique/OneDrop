@@ -3,6 +3,8 @@ package com.LesMiserables.OneDrop.donor.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 public class DonorResponseDTO {
@@ -13,4 +15,5 @@ public class DonorResponseDTO {
     private String fullName;
     private String email;
     private String phone;
+    private LocalDate lastDonationDate;
 }
